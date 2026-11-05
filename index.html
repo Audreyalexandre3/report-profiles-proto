@@ -118,14 +118,13 @@
   .step-section { display:flex; flex-direction:column; gap:var(--ref-spacing-sm); }
 
   /* edit-template.component.scss */
-  .edit-template__card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:var(--ref-spacing-sm); }
+  .edit-template__card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--ref-spacing-sm); }
   .edit-template__card { display:flex; flex-direction:column; align-items:flex-start; gap:var(--ref-spacing-xs); min-height:226px; padding:var(--ref-spacing-sm); border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-md); background:var(--ref-color-white); color:inherit; text-align:left; cursor:pointer; font:inherit; position:relative; }
   .edit-template__card:hover:not(:disabled) { border-color:var(--ref-color-grey-40); }
   .edit-template__card.selected { border-color:var(--ref-color-electric-blue-100); box-shadow:0 0 0 1px var(--ref-color-electric-blue-100); }
   .edit-template__card:disabled { cursor:not-allowed; opacity:.55; }
-  .edit-template__card.scratch { flex-direction:row; align-items:center; min-height:0; max-width:520px; }
-  .edit-template__card.scratch .edit-template__card-illustration { width:140px; height:80px; flex-shrink:0; }
-  .edit-template__card-illustration { width:100%; height:100px; border-radius:var(--ref-border-radius-md); background:var(--ref-color-grey-05); display:grid; gap:4px; padding:10px; }
+  .edit-template__card.scratch { width:calc(50% - var(--ref-spacing-sm) / 2); }
+  .edit-template__card-illustration { width:100%; height:120px; border-radius:var(--ref-border-radius-md); background-color:var(--ref-color-grey-10); background-size:cover; background-position:center; background-repeat:no-repeat; }
   .edit-template__card-illustration span { background:var(--ref-color-white); border-radius:4px; border:1px solid var(--ref-color-grey-10); }
   .edit-template__card-illustration span.accent { background:var(--ref-color-electric-blue-10); border-color:var(--ref-color-electric-blue-20); }
   .edit-template__card h3 { margin:0; font-size:var(--ref-font-size-sm); }
@@ -461,21 +460,23 @@ const byId = id => EVERY.find(x=>x.id===id);
 
 // ================= templates (ReportTemplateId in lib-report-customized) =================
 const META = ['facebook','instagram'];
+// Illustrations: the product's own images, hotlinked from the Report app (not copied into this repo)
+const IMG = f => `https://app.report.agorapulse.com/assets/img/report/report-studio-${f}-illustration.png`;
 const TEMPLATES = [
   { id:'SINGLE_REPORT', name:'Single profile report', desc:'Template designed for a single profile report', max:1,
-    tabs:['Audience','Posts insights','Community management'], ill:[1,2,2] },
-  { id:'AGGREGATED_BY_NETWORK_REPORT', name:'Aggregated by network report', desc:'Template designed for an aggregated by network report',
-    tabs:['Aggregated','One tab per network'], ill:[3,1,1] },
-  { id:'AGGREGATED_BY_PROFILE_REPORT', name:'Aggregated by profile report', desc:'Template designed for an aggregated by profile report',
-    tabs:['Audience','Posts insights','Community management'], ill:[2,2,1] },
+    tabs:['Audience','Posts insights','Community management'], img:IMG('template-single') },
+  { id:'AGGREGATED_BY_NETWORK_REPORT', name:'Compare networks', desc:'Template designed to compare networks',
+    tabs:['Aggregated','One tab per network'], img:IMG('template-agg-by-network') },
+  { id:'AGGREGATED_BY_PROFILE_REPORT', name:'Compare profiles', desc:'Template designed to compare profiles',
+    tabs:['Audience','Posts insights','Community management'], img:IMG('template-agg-by-profile') },
   { id:'INDIVIDUAL_REPORT', name:'Individual report', desc:'One tab per profile, each holding the full single profile report.',
-    tabs:['One tab per profile'], ill:[1,1,1,1] },
+    tabs:['One tab per profile'], img:IMG('template-individual') },
   { id:'META_SPLIT_ORGANIC_PAID_REPORT', name:'Meta split organic paid', desc:'Provides organic/paid breakdown for Meta profiles. Breakdown by profile.',
-    networks:META, tabs:['Organic vs paid','Posts insights'], ill:[2,1,2] },
-  { id:'AGGREGATED_BY_LABEL_REPORT', name:'Label report', desc:'Turn labels into campaign reports. Track results for any campaign you define',
-    tabs:['Labels'], ill:[1,3] },
+    networks:META, tabs:['Organic vs paid','Posts insights'], img:IMG('template-split-org-paid') },
+  { id:'AGGREGATED_BY_LABEL_REPORT', name:'Compare labels', desc:'Turn labels into campaign reports. Track results for any campaign you define',
+    tabs:['Labels'], img:IMG('template-agg-by-label') },
   { id:'TEAM_PERFORMANCE_REPORT', name:'Team performance report', desc:"Compare your team members' activity and results, profile by profile.",
-    tabs:['Team performance'], ill:[2,2] },
+    tabs:['Team performance'], img:IMG('template-team-performance') },
 ];
 const tplById = id => TEMPLATES.find(t=>t.id===id);
 
@@ -645,8 +646,7 @@ function renderSources(){
 }
 
 // ================= STEP: template =================
-const ill = rows => `<div class="edit-template__card-illustration" style="grid-template-rows:repeat(${rows.length},1fr)">${
-  rows.map((n,r)=>`<div style="display:grid;grid-template-columns:repeat(${n},1fr);gap:4px">${Array.from({length:n},(_,i)=>`<span class="${r===0&&i===0?'accent':''}"></span>`).join('')}</div>`).join('')}</div>`;
+const ill = src => `<div class="edit-template__card-illustration" style="background-image:url('${src}')"></div>`;
 
 function templateBlock(t){
   // only checked when profiles were picked before the template
@@ -665,13 +665,13 @@ function renderTemplate(){
   const extraTags = extra.map(x=>tag('+ '+x.l + (opts.order==='template' ? ' (if selected)' : ''), 'blue mini')).join('');
   $('scratchSlot').innerHTML = `
     <button type="button" class="edit-template__card scratch${S.template==='SCRATCH'?' selected':''}" data-tpl="SCRATCH">
-      ${ill([1])}<div><h3>Scratch</h3><p class="edit-template__card-description">Begin with a blank state and add your widgets.</p></div>
+      ${ill(IMG('scratch'))}<div><h3>Scratch</h3><p class="edit-template__card-description">Begin with a blank state and add your widgets.</p></div>
     </button>`;
   $('templates').innerHTML = TEMPLATES.map(t=>{
     const block = templateBlock(t);
     return `<button type="button" class="edit-template__card${S.template===t.id?' selected':''}" data-tpl="${t.id}" ${block?'disabled':''}>
       ${S.template===t.id?'<span class="card-corner ap-status blue no-dot">Selected</span>':''}
-      ${ill(t.ill)}
+      ${ill(t.img)}
       <div><h3>${t.name}</h3><p class="edit-template__card-description">${block ? block : t.desc}</p></div>
       <div class="card-tabs">${t.tabs.map(x=>tag(x,'grey mini')).join('')}${extraTags}</div>
     </button>`;
