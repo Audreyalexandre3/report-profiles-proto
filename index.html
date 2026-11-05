@@ -38,7 +38,8 @@
   .main { display:flex; flex-direction:column; min-width:0; height:100vh; }
   .head { display:flex; align-items:center; gap:var(--ref-spacing-xs); height:64px; padding:0 var(--ref-spacing-md); background:var(--ref-color-white); border-bottom:1px solid var(--ref-color-grey-10); flex-shrink:0; }
   .head .badge { margin-left:auto; }
-  .scroll { flex:1; overflow:auto; padding:var(--ref-spacing-lg) var(--ref-spacing-md); }
+  /* position:relative contains the DS's visually-hidden (absolute) checkbox inputs, otherwise they stretch the page */
+  .scroll { position:relative; flex:1; overflow:auto; padding:var(--ref-spacing-lg) var(--ref-spacing-md); }
   .wrap { max-width:860px; margin:0 auto; display:flex; flex-direction:column; gap:var(--ref-spacing-lg); }
   .ap-stepper { justify-content:center; }
 
@@ -88,6 +89,27 @@
   .foot .count.zero { color:var(--ref-color-grey-80); }
   .foot .spacer { flex:1; }
 
+  /* tabs (Team settings: Social Profiles | Ad accounts) */
+  .ap-tabs-tab .ap-counter { margin-left:2px; }
+  .ap-tabs[hidden] { display:none; }
+
+  /* ---------- prototype cog menu (copied from the Home prototype admin menu) ---------- */
+  .user-row { display:flex; align-items:center; gap:var(--ref-spacing-xxxs); margin-top:6px; }
+  .user-row .user { flex:1; margin-top:0; min-width:0; }
+  .ap-action-dropdown.proto-menu { position:fixed; left:12px; bottom:64px; width:320px; max-height:min(72vh,600px); overflow-y:auto; z-index:50; }
+  .proto-menu[hidden] { display:none; }
+  .admin-menu { display:flex; flex-direction:column; gap:var(--ref-spacing-sm); padding:var(--ref-spacing-xxs) var(--ref-spacing-xxs) 0; }
+  .admin-menu__section { display:flex; flex-direction:column; gap:var(--ref-spacing-xs); }
+  .admin-menu__section-title { font-size:var(--sys-text-style-caption-bold-size); line-height:var(--sys-text-style-caption-bold-line-height); font-weight:var(--sys-text-style-caption-bold-weight); color:var(--ref-color-grey-80); }
+  .admin-menu__cards { display:flex; flex-direction:column; gap:var(--ref-spacing-xxs); }
+  .admin-menu__flags { display:flex; flex-direction:column; }
+  .admin-menu__opt-text { display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .admin-menu__opt-label { font-size:var(--sys-text-style-body-size); line-height:var(--sys-text-style-body-line-height); font-weight:var(--sys-text-style-body-bold-weight); color:var(--ref-color-grey-100); }
+  .admin-menu__opt-hint { font-size:var(--sys-text-style-caption-size); line-height:var(--sys-text-style-caption-line-height); color:var(--ref-color-grey-80); }
+  .admin-menu__flag { display:flex; align-items:center; justify-content:space-between; gap:var(--ref-spacing-sm); padding:var(--ref-spacing-xs) 0; cursor:pointer; }
+  .admin-menu__flag > .admin-menu__opt-label { flex:1; min-width:0; }
+  .admin-menu__flag + .admin-menu__flag { border-top:1px solid var(--ref-color-grey-10); }
+
   .snack { position:fixed; bottom:92px; left:50%; transform:translateX(-50%); display:none; }
   .snack.show { display:flex; }
 </style>
@@ -113,8 +135,31 @@
     <button class="ap-button stroked blue"><i class="ap-icon-paper-plane"></i><span>Create post</span></button>
     <div class="navitem"><i class="ap-icon-bell"></i>Notifications</div>
     <div class="navitem"><i class="ap-icon-plus"></i>Add user/profile</div>
-    <div class="user"><span class="ap-avatar size-24"><span class="ap-avatar-initials">J</span></span>Julien Descorps</div>
+    <div class="user-row">
+      <div class="user"><span class="ap-avatar size-24"><span class="ap-avatar-initials">J</span></span>Julien Descorps</div>
+      <button class="ap-icon-button" id="cog" aria-label="Prototype settings" aria-expanded="false"><i class="ap-icon-cog"></i></button>
+    </div>
   </nav>
+
+  <!-- Prototype settings (same pattern as the Home prototype's cog menu) -->
+  <div class="ap-action-dropdown proto-menu" id="protoMenu" hidden>
+    <div class="admin-menu">
+      <div class="admin-menu__section">
+        <span class="admin-menu__section-title">What can be added to the report</span>
+        <div class="admin-menu__cards" role="radiogroup" aria-label="Selection mode">
+          <label class="ap-radio-card card"><input type="radio" name="mode" value="profiles"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Social profiles only</span><span class="admin-menu__opt-hint">Today's scope: groups and profiles</span></span></label>
+          <label class="ap-radio-card card"><input type="radio" name="mode" value="sources"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Several sources</span><span class="admin-menu__opt-hint">Tabs like Team settings: profiles, ad accounts, Listening, competitors</span></span></label>
+        </div>
+      </div>
+      <div class="admin-menu__section">
+        <span class="admin-menu__section-title">Display</span>
+        <div class="admin-menu__flags">
+          <label class="admin-menu__flag"><span class="admin-menu__opt-label">Show disconnected profiles</span><span class="ap-toggle-container"><input type="checkbox" id="optOff"><i></i></span></label>
+          <label class="admin-menu__flag"><span class="admin-menu__opt-label">Groups expanded by default</span><span class="ap-toggle-container"><input type="checkbox" id="optOpen"><i></i></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- MAIN -->
   <div class="main">
@@ -127,7 +172,7 @@
     <div class="scroll">
       <div class="wrap">
         <div class="ap-stepper">
-          <div class="ap-stepper-item active"><span>1</span><span>Social Profiles</span></div>
+          <div class="ap-stepper-item active"><span>1</span><span id="step1">Social Profiles</span></div>
           <span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>
           <div class="ap-stepper-item pending"><span>2</span><span>Template</span></div>
           <span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>
@@ -136,9 +181,11 @@
 
         <section class="ap-card picker">
           <div class="picker-head">
-            <h2 class="ap-h2">Social profiles</h2>
-            <p>Pick the groups or profiles to include in your report.</p>
+            <h2 class="ap-h2" id="title">Social profiles</h2>
+            <p id="subtitle">Pick the groups or profiles to include in your report.</p>
           </div>
+
+          <div class="ap-tabs" id="tabsWrap" hidden><div class="ap-tabs-nav" id="tabs" role="tablist"></div></div>
 
           <div class="toolbar">
             <div class="ap-input-group"><i class="ap-icon-search"></i><input id="q" placeholder="Search a group or profile" autocomplete="off"></div>
@@ -147,7 +194,7 @@
           </div>
 
           <div class="access-all-profiles" id="allWrap">
-            <label class="ap-checkbox-container" id="allBox"><input type="checkbox" id="allInput"><i></i><span>All profiles</span></label>
+            <label class="ap-checkbox-container" id="allBox"><input type="checkbox" id="allInput"><i></i><span id="allLabel">All profiles</span></label>
           </div>
 
           <div id="list"></div>
@@ -193,25 +240,66 @@ const UNGROUPED = [
   ['Jck Flap Band 1','Jck Flap Band 1','facebook',1], ['Ibrahima Diaby','Ibrahima Diaby','linkedin'],
 ].map((p,i)=>({ id:`none-${i}`, name:p[0], handle:p[1], net:p[2], off:!!p[3] }));
 
-const ALL = [...GROUPS.flatMap(g=>g.profiles), ...UNGROUPED];
-const OK = ALL.filter(p=>!p.off);
+
+// Other report sources: flat lists, like the "Ad accounts" tab in Team settings
+const mk = (prefix, rows) => rows.map((p,i)=>({ id:`${prefix}-${i}`, name:p[0], handle:p[1], net:p[2], icon:p[3], off:!!p[4] }));
+const AD = mk('ad', [
+  ['Agorapulse Ads','act_1029384756','facebook'], ['Agorapulse FR Ads','act_5566778899','facebook'],
+  ['Agorapulse LinkedIn Ads','508812345','linkedin'], ['Agorapulse TikTok Ads','7012345678901','tiktok'],
+  ['Agorapulse Events Ads','act_1122334455','facebook',null,1] ]);
+const LISTEN = mk('ls', [
+  ['Brand mentions','“agorapulse” OR “agora pulse” · 12.4k mentions',null,'feature-listening'],
+  ['Competitors watch','hootsuite, sprout social · 3.1k mentions',null,'feature-listening'],
+  ['Archie launch','#archie · 860 mentions',null,'feature-listening'],
+  ['Agorapulse Summit 2026','“agorapulse summit” · 214 mentions',null,'feature-listening'] ]);
+const COMP = mk('cp', [
+  ['Hootsuite','hootsuite','instagram'], ['Hootsuite','Hootsuite','linkedin'], ['Sprout Social','sproutsocial','x'],
+  ['Buffer','buffer','instagram'], ['Later','latermedia','tiktok'] ]);
+
+const SOURCES = {
+  profiles:    { label:'Social profiles', one:'profile', many:'profiles', all:'All profiles', search:'Search a group or profile', groups:GROUPS, items:UNGROUPED,
+                 offTip:'Reconnect this profile to add it to a report' },
+  ads:         { label:'Ad accounts', one:'ad account', many:'ad accounts', all:'All ad accounts', search:'Search an ad account', groups:[], items:AD,
+                 offTip:'Reconnect this ad account to add it to a report' },
+  listening:   { label:'Listening searches', one:'Listening search', many:'Listening searches', all:'All Listening searches', search:'Search a Listening search', groups:[], items:LISTEN },
+  competitors: { label:'Competitors', one:'competitor', many:'competitors', all:'All competitors', search:'Search a competitor', groups:[], items:COMP },
+};
+const itemsOf = k => [...SOURCES[k].groups.flatMap(g=>g.profiles), ...SOURCES[k].items];
+const EVERY = Object.keys(SOURCES).flatMap(itemsOf);
+
+// ---------- prototype settings (cog) — URL wins, then localStorage ----------
+const store = { get(k){ try { return localStorage.getItem('rpp.'+k); } catch(e){ return null; } },
+                set(k,v){ try { localStorage.setItem('rpp.'+k, v); } catch(e){} } };
+const url = new URLSearchParams(location.search);
+const opts = {
+  mode:    url.get('mode') || store.get('mode') || 'profiles',
+  showOff: (store.get('showOff') ?? '1') === '1',
+  openAll: store.get('openAll') === '1',
+};
+
 const selected = new Set();
-const open = new Set(['emoji']);
+let open = new Set(opts.openAll ? GROUPS.map(g=>g.id) : ['emoji']);
+let tab = 'profiles';
 let q = '';
 
 const esc = s => s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const initial = s => ([...s.replace(/[^\p{L}\p{N}]/gu,'')][0]||'?').toUpperCase();
 const hl = s => { const e = esc(s); if(!q) return e; const i = s.toLowerCase().indexOf(q); if(i<0) return e;
   return esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length)); };
-const avatar = (p,size=36) => `<span class="ap-avatar size-${size}"><span class="ap-avatar-initials">${initial(p.name)}</span>${size>=32?`<span class="ap-avatar-network"><i class="ap-icon-${NET[p.net]}"></i></span>`:''}</span>`;
+const avatar = (p,size=36) => p.icon
+  ? `<span class="ap-avatar size-${size} square"><span class="ap-avatar-initials"><i class="ap-icon-${p.icon}"></i></span></span>`
+  : `<span class="ap-avatar size-${size}"><span class="ap-avatar-initials">${initial(p.name)}</span>${size>=32?`<span class="ap-avatar-network"><i class="ap-icon-${NET[p.net]}"></i></span>`:''}</span>`;
 const checkbox = (state, attrs='', disabled=false) =>
   `<label class="ap-checkbox-container${state==='some'?' indeterminate':''}" ${attrs}><input type="checkbox" ${state==='all'?'checked':''} ${disabled?'disabled':''}><i></i></label>`;
 const stateOf = list => { const ok = list.filter(p=>!p.off); const n = ok.filter(p=>selected.has(p.id)).length;
   return n===0?'none':n===ok.length?'all':'some'; };
 const matches = p => (p.name+' '+p.handle).toLowerCase().includes(q);
+const shown = list => opts.showOff ? list : list.filter(p=>!p.off);
+const plural = (n, s) => `${n} ${n>1?s.many:s.one}`;
+const activeSources = () => opts.mode==='sources' ? Object.keys(SOURCES) : ['profiles'];
 
 // ap-team-role-item
-const roleItem = p => `
+const roleItem = (p, src) => `
   <div class="team-item-role${p.off?' disconnected':''}">
     ${checkbox(selected.has(p.id)?'all':'none', `data-p="${p.id}"`, p.off)}
     <div class="item-name-container">
@@ -221,13 +309,38 @@ const roleItem = p => `
         <div class="name"><span class="item-username">${hl(p.handle)}</span></div>
       </div>
     </div>
-    ${p.off?`<span class="tip-anchor"><span class="ap-status red">Disconnected</span><span class="ap-tooltip top-right">Reconnect this profile to add it to a report</span></span>`:''}
+    ${p.off?`<span class="tip-anchor"><span class="ap-status red">Disconnected</span><span class="ap-tooltip top-right">${src.offTip}</span></span>`:''}
   </div>`;
 
+function renderTabs(){
+  const wrap = document.getElementById('tabsWrap');
+  wrap.hidden = opts.mode!=='sources';
+  if(wrap.hidden) return;
+  document.getElementById('tabs').innerHTML = Object.entries(SOURCES).map(([k,s])=>{
+    const n = itemsOf(k).filter(p=>selected.has(p.id)).length;
+    return `<button class="ap-tabs-tab${k===tab?' active':''}" role="tab" data-tab="${k}">${s.label}${n?`<span class="ap-counter normal blue">${n}</span>`:''}</button>`;
+  }).join('');
+}
+
 function render(){
+  if(opts.mode!=='sources') tab = 'profiles';
+  const src = SOURCES[tab];
+  renderTabs();
+
+  // header copy
+  const multi = opts.mode==='sources';
+  document.getElementById('title').textContent = multi ? 'Sources' : 'Social profiles';
+  document.getElementById('subtitle').textContent = multi
+    ? 'Pick what to include in your report: social profiles, ad accounts, Listening searches or competitors.'
+    : 'Pick the groups or profiles to include in your report.';
+  document.getElementById('step1').textContent = multi ? 'Sources' : 'Social Profiles';
+  document.getElementById('q').placeholder = src.search;
+  document.getElementById('allLabel').textContent = src.all;
+
+  // list
   let html = '';
-  for(const g of GROUPS){
-    const ps = !q || g.name.toLowerCase().includes(q) ? g.profiles : g.profiles.filter(matches);
+  for(const g of src.groups){
+    const ps = shown(!q || g.name.toLowerCase().includes(q) ? g.profiles : g.profiles.filter(matches));
     if(!ps.length) continue;
     const ok = g.profiles.filter(p=>!p.off), n = ok.filter(p=>selected.has(p.id)).length;
     const expanded = open.has(g.id) || !!q;
@@ -246,37 +359,40 @@ function render(){
           ${n?`<span class="menu-group-selected">${n} of ${ok.length} selected</span>`:''}
           <button class="ap-icon-button ap-accordion-toggle" aria-label="${expanded?'Collapse':'Expand'}"><i class="ap-icon-chevron-up"></i></button>
         </div>
-        <div class="ap-accordion-content"><div class="profile-roles">${ps.map(roleItem).join('')}</div></div>
+        <div class="ap-accordion-content"><div class="profile-roles">${ps.map(p=>roleItem(p,src)).join('')}</div></div>
       </div>
     </div>`;
   }
-  const loose = q ? UNGROUPED.filter(matches) : UNGROUPED;
-  if(loose.length) html += `<div class="profile-roles">${loose.map(roleItem).join('')}</div>`;
+  const loose = shown(q ? src.items.filter(matches) : src.items);
+  if(loose.length) html += `<div class="profile-roles">${loose.map(p=>roleItem(p,src)).join('')}</div>`;
 
   document.getElementById('list').innerHTML = html
     ? `<div class="menu-groups-and-profile-roles">${html}</div>`
     : `<div class="empty-search-container">
-         <div class="empty-search-content"><h2 class="ap-h4">No results found</h2><span>There are no social profiles matching “${esc(q)}”. Try something else or reset your search.</span></div>
+         <div class="empty-search-content"><h2 class="ap-h4">No results found</h2><span>There are no ${src.many} matching “${esc(q)}”. Try something else or reset your search.</span></div>
          <a class="ap-link standalone" role="button" id="reset"><i class="ap-icon-reset"></i>Reset search</a>
        </div>`;
 
-  const s = stateOf(ALL);
+  const items = itemsOf(tab), s = stateOf(items);
   document.getElementById('allBox').classList.toggle('indeterminate', s==='some');
   document.getElementById('allInput').checked = s==='all';
   document.getElementById('allWrap').style.display = q ? 'none' : '';
 
-  const sel = ALL.filter(p=>selected.has(p.id));
+  // footer: selection across the sources in play
+  const parts = activeSources().map(k=>({ k, n:itemsOf(k).filter(p=>selected.has(p.id)).length })).filter(x=>x.n);
+  const sel = activeSources().flatMap(itemsOf).filter(p=>selected.has(p.id));
   const c = document.getElementById('count');
-  c.textContent = sel.length ? `${sel.length} profile${sel.length>1?'s':''} selected` : 'No profiles selected yet';
+  c.textContent = sel.length ? parts.map(x=>plural(x.n, SOURCES[x.k])).join(', ') + ' selected'
+                             : (multi ? 'Nothing selected yet' : 'No profiles selected yet');
   c.classList.toggle('zero', !sel.length);
   // ap-avatar-group renders row-reverse: DOM order is reversed
-  const shown = sel.slice(0,5);
-  document.getElementById('stack').innerHTML = (sel.length>5?`<span class="ap-avatar-group-overflow">+${sel.length-5}</span>`:'') + shown.reverse().map(p=>avatar(p,24)).join('');
+  const top = sel.slice(0,5);
+  document.getElementById('stack').innerHTML = (sel.length>5?`<span class="ap-avatar-group-overflow">+${sel.length-5}</span>`:'') + top.reverse().map(p=>avatar(p,24)).join('');
   document.getElementById('clear').style.display = sel.length ? '' : 'none';
   document.getElementById('next').disabled = !sel.length;
   const t = document.getElementById('toggleAll');
   t.textContent = open.size===GROUPS.length ? 'Collapse all' : 'Expand all';
-  t.style.visibility = q ? 'hidden' : '';
+  t.style.visibility = (q || !src.groups.length) ? 'hidden' : '';
 }
 
 document.getElementById('list').addEventListener('click', e => {
@@ -285,18 +401,41 @@ document.getElementById('list').addEventListener('click', e => {
   if(g){ e.preventDefault();
     const grp = GROUPS.find(x=>x.id===g.dataset.g); const all = stateOf(grp.profiles)==='all';
     grp.profiles.filter(x=>!x.off).forEach(x=> all?selected.delete(x.id):selected.add(x.id)); render(); return; }
-  if(p){ e.preventDefault(); const prof = ALL.find(x=>x.id===p.dataset.p); if(prof.off) return;
-    selected.has(prof.id)?selected.delete(prof.id):selected.add(prof.id); render(); return; }
+  if(p){ e.preventDefault(); const it = EVERY.find(x=>x.id===p.dataset.p); if(it.off) return;
+    selected.has(it.id)?selected.delete(it.id):selected.add(it.id); render(); return; }
   if(tg && !q){ const id = tg.dataset.toggle; open.has(id)?open.delete(id):open.add(id); render(); }
 });
+document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(!b) return;
+  tab = b.dataset.tab; q=''; document.getElementById('q').value=''; render(); });
 document.getElementById('allBox').addEventListener('click', e => { e.preventDefault();
-  const all = stateOf(ALL)==='all'; OK.forEach(p=> all?selected.delete(p.id):selected.add(p.id)); render(); });
+  const items = itemsOf(tab), all = stateOf(items)==='all';
+  items.filter(p=>!p.off).forEach(p=> all?selected.delete(p.id):selected.add(p.id)); render(); });
 document.getElementById('q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
 document.getElementById('toggleAll').addEventListener('click', () => {
   if(open.size===GROUPS.length) open.clear(); else GROUPS.forEach(g=>open.add(g.id)); render(); });
-document.getElementById('clear').addEventListener('click', () => { selected.clear(); render(); });
+document.getElementById('clear').addEventListener('click', () => { activeSources().flatMap(itemsOf).forEach(p=>selected.delete(p.id)); render(); });
 document.getElementById('next').addEventListener('click', () => { const s = document.getElementById('snack');
   s.classList.add('show'); setTimeout(()=>s.classList.remove('show'), 1800); });
+
+// ---------- cog menu ----------
+const cog = document.getElementById('cog'), menu = document.getElementById('protoMenu');
+function syncMenu(){
+  menu.querySelectorAll('input[name=mode]').forEach(r => r.checked = r.value===opts.mode);
+  document.getElementById('optOff').checked = opts.showOff;
+  document.getElementById('optOpen').checked = opts.openAll;
+}
+cog.addEventListener('click', e => { e.stopPropagation(); menu.hidden = !menu.hidden; cog.setAttribute('aria-expanded', String(!menu.hidden)); syncMenu(); });
+document.addEventListener('click', e => { if(!menu.hidden && !menu.contains(e.target)) { menu.hidden = true; cog.setAttribute('aria-expanded','false'); } });
+document.addEventListener('keydown', e => { if(e.key==='Escape') menu.hidden = true; });
+menu.addEventListener('change', e => {
+  const t = e.target;
+  if(t.name==='mode'){ opts.mode = t.value; store.set('mode', t.value);
+    const u = new URL(location.href); u.searchParams.set('mode', t.value); history.replaceState(null,'',u); q=''; document.getElementById('q').value=''; }
+  if(t.id==='optOff'){ opts.showOff = t.checked; store.set('showOff', t.checked?'1':'0'); }
+  if(t.id==='optOpen'){ opts.openAll = t.checked; store.set('openAll', t.checked?'1':'0');
+    open = new Set(t.checked ? GROUPS.map(g=>g.id) : ['emoji']); }
+  render();
+});
 render();
 </script>
 </body>
