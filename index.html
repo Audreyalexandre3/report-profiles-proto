@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Report profile picker — Agorapulse prototype</title>
+<title>Report Studio flow — Agorapulse prototype</title>
 <!-- Real Agorapulse design system (CSS-UI), linked from its public jsDelivr CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@agorapulse/ui-theme@22.0.7/assets/desktop_variables.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@agorapulse/ui-theme@22.0.7/assets/style/css-ui/font-face.css">
@@ -14,7 +14,7 @@
      "team settings" are copied from the platform components that render
      Settings → Team → Social profiles (team-menu-group, team-role-item, …). */
   * { box-sizing:border-box; }
-  html,body { margin:0; height:100%; }
+  html,body { margin:0; height:100%; overflow:hidden; }
   body { background:var(--ref-color-grey-bg); color:var(--ref-color-grey-100); font-family:var(--ref-font-family); font-size:var(--ref-font-size-sm); -webkit-font-smoothing:antialiased; }
   h1,h2,p { margin:0; }
 
@@ -110,12 +110,110 @@
   .admin-menu__flag > .admin-menu__opt-label { flex:1; min-width:0; }
   .admin-menu__flag + .admin-menu__flag { border-top:1px solid var(--ref-color-grey-10); }
 
-  .snack { position:fixed; bottom:92px; left:50%; transform:translateX(-50%); display:none; }
-  .snack.show { display:flex; }
+
+  /* ---------- flow steps (report-config-editor: .config-step__content 700px, .config-step__card) ---------- */
+  .config-step__content { display:flex; flex-direction:column; gap:var(--ref-spacing-md); width:100%; }
+  .config-step__card { display:flex; flex-direction:column; align-items:stretch; gap:var(--ref-spacing-sm); padding:var(--ref-spacing-sm); border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-md); background:var(--ref-color-white); }
+  .config-step__card .desc { color:var(--ref-color-grey-80); }
+  .step-section { display:flex; flex-direction:column; gap:var(--ref-spacing-sm); }
+
+  /* edit-template.component.scss */
+  .edit-template__card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:var(--ref-spacing-sm); }
+  .edit-template__card { display:flex; flex-direction:column; align-items:flex-start; gap:var(--ref-spacing-xs); min-height:226px; padding:var(--ref-spacing-sm); border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-md); background:var(--ref-color-white); color:inherit; text-align:left; cursor:pointer; font:inherit; position:relative; }
+  .edit-template__card:hover:not(:disabled) { border-color:var(--ref-color-grey-40); }
+  .edit-template__card.selected { border-color:var(--ref-color-electric-blue-100); box-shadow:0 0 0 1px var(--ref-color-electric-blue-100); }
+  .edit-template__card:disabled { cursor:not-allowed; opacity:.55; }
+  .edit-template__card.scratch { flex-direction:row; align-items:center; min-height:0; max-width:520px; }
+  .edit-template__card.scratch .edit-template__card-illustration { width:140px; height:80px; flex-shrink:0; }
+  .edit-template__card-illustration { width:100%; height:100px; border-radius:var(--ref-border-radius-md); background:var(--ref-color-grey-05); display:grid; gap:4px; padding:10px; }
+  .edit-template__card-illustration span { background:var(--ref-color-white); border-radius:4px; border:1px solid var(--ref-color-grey-10); }
+  .edit-template__card-illustration span.accent { background:var(--ref-color-electric-blue-10); border-color:var(--ref-color-electric-blue-20); }
+  .edit-template__card h3 { margin:0; font-size:var(--ref-font-size-sm); }
+  .edit-template__card-description { margin:2px 0 0; color:var(--ref-color-grey-80); font-size:var(--ref-font-size-xs); line-height:var(--ref-font-line-height-xs); }
+  .card-tabs { display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; }
+  .card-corner { position:absolute; top:12px; right:12px; }
+
+  /* general information */
+  .form-row { display:flex; flex-direction:column; gap:var(--ref-spacing-xxs); max-width:420px; }
+  .form-row label.lbl { font-weight:var(--ref-font-weight-bold); }
+  .ap-input-group input, .ap-select-trigger select { border:none; outline:none; background:transparent; font:inherit; color:inherit; flex:1; min-width:0; }
+  .ap-select { position:relative; max-width:420px; }
+  .ap-select-trigger select { appearance:none; cursor:pointer; }
+  .dropzone { display:flex; align-items:center; gap:var(--ref-spacing-sm); padding:var(--ref-spacing-sm); border:1px dashed var(--ref-color-grey-40); border-radius:var(--ref-border-radius-md); max-width:420px; }
+  .dropzone .thumb { width:48px; height:48px; border-radius:var(--ref-border-radius-md); background:var(--ref-color-grey-05); display:flex; align-items:center; justify-content:center; color:var(--ref-color-grey-60); }
+  .swatches { display:flex; gap:8px; }
+  .swatch { width:28px; height:28px; border-radius:50%; border:2px solid var(--ref-color-white); box-shadow:0 0 0 1px var(--ref-color-grey-20); cursor:pointer; }
+  .swatch.on { box-shadow:0 0 0 2px var(--ref-color-electric-blue-100); }
+
+  /* report configuration */
+  .label-sentence { display:flex; align-items:center; flex-wrap:wrap; gap:var(--ref-spacing-xxs); }
+  .label-sentence select { font:inherit; border:1px solid var(--ref-color-grey-20); border-radius:var(--ref-border-radius-md); padding:4px 8px; color:inherit; background:var(--ref-color-white); }
+  .label-box { display:flex; flex-wrap:wrap; gap:6px; align-items:center; border:1px solid var(--ref-color-grey-20); border-radius:var(--ref-border-radius-md); padding:6px 8px; min-height:40px; }
+  .label-box input { border:none; outline:none; font:inherit; flex:1; min-width:180px; }
+  .suggestions { display:flex; flex-wrap:wrap; gap:6px; }
+  .suggestions .ap-tag { cursor:pointer; }
+  .ap-tag .x { cursor:pointer; margin-left:4px; }
+
+  /* ---------- report view ---------- */
+  .report { display:none; flex-direction:column; min-width:0; height:100vh; }
+  .app.view-report .main { display:none; } .app.view-report .report { display:flex; }
+  .r-head { display:flex; align-items:center; gap:var(--ref-spacing-xs); padding:var(--ref-spacing-xs) var(--ref-spacing-md); background:var(--ref-color-white); border-bottom:1px solid var(--ref-color-grey-10); flex-shrink:0; }
+  .r-title { display:flex; align-items:center; gap:var(--ref-spacing-xs); min-width:0; }
+  .r-title img, .r-title .pic { width:36px; height:36px; border-radius:var(--ref-border-radius-md); background:var(--ref-color-electric-blue-10); display:flex; align-items:center; justify-content:center; color:var(--ref-color-electric-blue-100); flex-shrink:0; }
+  .r-title .meta { color:var(--ref-color-grey-80); font-size:var(--ref-font-size-xs); }
+  .r-head .spacer { flex:1; }
+  .r-bar { display:flex; align-items:center; gap:var(--ref-spacing-sm); padding:var(--ref-spacing-xs) var(--ref-spacing-md) 0; background:var(--ref-color-white); flex-shrink:0; flex-wrap:wrap; }
+  .r-bar .chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--ref-color-grey-20); border-radius:var(--ref-border-radius-md); padding:6px 10px; background:var(--ref-color-white); }
+  .r-tabs { background:var(--ref-color-white); padding:0 var(--ref-spacing-md); flex-shrink:0; }
+  .r-tabs .ap-tabs-tab { gap:6px; }
+  .r-body { position:relative; flex:1; overflow:auto; padding:var(--ref-spacing-md); }
+  .r-tab-tools { display:flex; align-items:center; gap:var(--ref-spacing-xs); margin-bottom:var(--ref-spacing-sm); }
+  .r-tab-tools .spacer { flex:1; }
+  .r-tab-tools .hint { color:var(--ref-color-grey-80); font-size:var(--ref-font-size-xs); }
+  .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--ref-spacing-sm); }
+  .section-title { grid-column:1/-1; font-weight:var(--ref-font-weight-bold); font-size:var(--ref-font-size-md); margin-top:var(--ref-spacing-xs); }
+  .widget { background:var(--ref-color-white); border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-md); padding:var(--ref-spacing-sm); display:flex; flex-direction:column; gap:var(--ref-spacing-xs); min-height:150px; position:relative; }
+  .widget.w2 { grid-column:span 2; } .widget.w4 { grid-column:1/-1; }
+  .widget.new { animation:pop .5s ease; }
+  @keyframes pop { from { box-shadow:0 0 0 3px var(--ref-color-electric-blue-40); } to { box-shadow:none; } }
+  .w-head { display:flex; align-items:flex-start; gap:var(--ref-spacing-xxs); }
+  .w-head .t { font-weight:var(--ref-font-weight-bold); }
+  .w-head .s { color:var(--ref-color-grey-80); font-size:var(--ref-font-size-xs); }
+  .w-head .spacer { flex:1; }
+  .w-kpi { font-size:28px; font-weight:var(--ref-font-weight-bold); line-height:1.1; }
+  .w-delta { font-size:var(--ref-font-size-xs); font-weight:var(--ref-font-weight-bold); color:var(--ref-color-green-100,#2EB67D); }
+  .w-delta.down { color:var(--ref-color-red-100,#E5484D); }
+  .w-chart { width:100%; height:90px; display:block; margin-top:auto; }
+  .w-sources { display:flex; flex-wrap:wrap; gap:4px; }
+  .w-list { display:flex; flex-direction:column; gap:6px; }
+  .w-list .row { display:flex; align-items:center; gap:var(--ref-spacing-xs); font-size:var(--ref-font-size-xs); }
+  .w-list .row .bar { height:6px; border-radius:3px; background:var(--ref-color-electric-blue-100); }
+  .w-list .row .n { margin-left:auto; font-weight:var(--ref-font-weight-bold); }
+  .w-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--ref-spacing-xs); text-align:center; color:var(--ref-color-grey-80); padding:var(--ref-spacing-sm); background:var(--ref-color-grey-05); border-radius:var(--ref-border-radius-md); }
+  .w-empty i { font-size:22px; color:var(--ref-color-grey-60); }
+  .report-empty { display:flex; flex-direction:column; align-items:center; gap:var(--ref-spacing-sm); padding:64px 16px; text-align:center; }
+  .report-empty p { color:var(--ref-color-grey-80); max-width:420px; }
+
+  /* widget library drawer */
+  .drawer { position:fixed; top:0; right:0; bottom:0; width:380px; background:var(--ref-color-white); border-left:1px solid var(--ref-color-grey-10); box-shadow:-8px 0 28px rgba(52,69,99,.12); z-index:40; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .2s ease; }
+  .drawer.open { transform:none; }
+  .drawer-head { display:flex; align-items:center; gap:var(--ref-spacing-xs); padding:var(--ref-spacing-sm); border-bottom:1px solid var(--ref-color-grey-10); }
+  .drawer-head .spacer { flex:1; }
+  .drawer-body { flex:1; overflow:auto; padding:var(--ref-spacing-sm); display:flex; flex-direction:column; gap:var(--ref-spacing-xs); }
+  .lib-cat .ap-accordion-header { cursor:pointer; }
+  .lib-cat .ap-accordion-content { padding:var(--ref-spacing-xxs); gap:2px; }
+  .lib-cat .cat-desc { color:var(--ref-color-grey-80); font-size:var(--ref-font-size-xs); font-weight:400; }
+  .lib-item { display:flex; align-items:center; gap:var(--ref-spacing-xs); padding:8px; border-radius:var(--ref-border-radius-md); cursor:pointer; border:none; background:none; width:100%; font:inherit; color:inherit; text-align:left; }
+  .lib-item:hover { background:var(--ref-color-grey-05); }
+  .lib-item .spacer { flex:1; }
+  .lib-note { font-size:var(--ref-font-size-xs); color:var(--ref-color-grey-80); padding:0 8px 6px; }
+  .ap-snackbar.snack { position:fixed; bottom:92px; left:50%; transform:translateX(-50%); display:none; z-index:60; }
+  .ap-snackbar.snack.show { display:flex; }
+  .r-bar .chip[hidden] { display:none; }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <!-- LEFT NAV (static) -->
   <nav class="nav">
     <div class="logo">agorapulse</div>
@@ -146,72 +244,166 @@
     <div class="admin-menu">
       <div class="admin-menu__section">
         <span class="admin-menu__section-title">What can be added to the report</span>
-        <div class="admin-menu__cards" role="radiogroup" aria-label="Selection mode">
-          <label class="ap-radio-card card"><input type="radio" name="mode" value="profiles"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Social profiles only</span><span class="admin-menu__opt-hint">Today's scope: groups and profiles</span></span></label>
-          <label class="ap-radio-card card"><input type="radio" name="mode" value="sources"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Several sources</span><span class="admin-menu__opt-hint">Tabs like Team settings: profiles, ad accounts, Listening, competitors</span></span></label>
+        <div class="admin-menu__cards" role="radiogroup">
+          <label class="ap-radio-card card"><input type="radio" name="mode" value="profiles"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Social profiles only</span><span class="admin-menu__opt-hint">Today's scope. Listening and competitors are picked inside each widget</span></span></label>
+          <label class="ap-radio-card card"><input type="radio" name="mode" value="sources"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Several sources</span><span class="admin-menu__opt-hint">Tabs like Team settings: profiles, ad accounts, Listening, competitors. Widgets are prefilled</span></span></label>
+        </div>
+      </div>
+      <div class="admin-menu__section">
+        <span class="admin-menu__section-title">Step order</span>
+        <div class="admin-menu__cards" role="radiogroup">
+          <label class="ap-radio-card card"><input type="radio" name="order" value="template"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Template first</span><span class="admin-menu__opt-hint">Current code (master)</span></span></label>
+          <label class="ap-radio-card card"><input type="radio" name="order" value="sources"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Profiles first</span><span class="admin-menu__opt-hint">As in the beta screenshot</span></span></label>
         </div>
       </div>
       <div class="admin-menu__section">
         <span class="admin-menu__section-title">Display</span>
         <div class="admin-menu__flags">
+          <label class="admin-menu__flag"><span class="admin-menu__opt-label">Report configuration step</span><span class="ap-toggle-container"><input type="checkbox" id="optConfig"><i></i></span></label>
           <label class="admin-menu__flag"><span class="admin-menu__opt-label">Show disconnected profiles</span><span class="ap-toggle-container"><input type="checkbox" id="optOff"><i></i></span></label>
           <label class="admin-menu__flag"><span class="admin-menu__opt-label">Groups expanded by default</span><span class="ap-toggle-container"><input type="checkbox" id="optOpen"><i></i></span></label>
         </div>
       </div>
+      <div class="admin-menu__section" style="padding-bottom:8px">
+        <button class="ap-button stroked grey" id="restart"><i class="ap-icon-refresh"></i><span>Restart the flow</span></button>
+      </div>
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- CONFIG EDITOR -->
   <div class="main">
     <header class="head">
-      <button class="ap-icon-button" aria-label="Back"><i class="ap-icon-arrow-left"></i></button>
+      <button class="ap-icon-button" aria-label="Back" id="quit"><i class="ap-icon-arrow-left"></i></button>
       <h1 class="ap-h1">Create a customized report</h1>
       <span class="ap-status blue no-dot badge">Prototype</span>
     </header>
 
-    <div class="scroll">
+    <div class="scroll" id="scroll">
       <div class="wrap">
-        <div class="ap-stepper">
-          <div class="ap-stepper-item active"><span>1</span><span id="step1">Social Profiles</span></div>
-          <span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>
-          <div class="ap-stepper-item pending"><span>2</span><span>Template</span></div>
-          <span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>
-          <div class="ap-stepper-item pending"><span>3</span><span>General information</span></div>
-        </div>
+        <div class="ap-stepper" id="stepper"></div>
 
-        <section class="ap-card picker">
+        <!-- STEP: sources -->
+        <section class="ap-card picker step" data-step="sources">
           <div class="picker-head">
             <h2 class="ap-h2" id="title">Social profiles</h2>
             <p id="subtitle">Pick the groups or profiles to include in your report.</p>
           </div>
-
+          <div id="limitBox"></div>
           <div class="ap-tabs" id="tabsWrap" hidden><div class="ap-tabs-nav" id="tabs" role="tablist"></div></div>
-
           <div class="toolbar">
             <div class="ap-input-group"><i class="ap-icon-search"></i><input id="q" placeholder="Search a group or profile" autocomplete="off"></div>
             <span class="spacer"></span>
             <a class="ap-link standalone" id="toggleAll" role="button">Expand all</a>
           </div>
-
           <div class="access-all-profiles" id="allWrap">
             <label class="ap-checkbox-container" id="allBox"><input type="checkbox" id="allInput"><i></i><span id="allLabel">All profiles</span></label>
           </div>
-
           <div id="list"></div>
         </section>
+
+        <!-- STEP: template -->
+        <div class="config-step__content step" data-step="template">
+          <section class="step-section">
+            <h2 class="ap-h2">Create your own report</h2>
+            <div id="scratchSlot"></div>
+          </section>
+          <section class="step-section">
+            <h2 class="ap-h2">Start from a template</h2>
+            <div class="edit-template__card-grid" id="templates"></div>
+          </section>
+        </div>
+
+        <!-- STEP: settings (General information) -->
+        <div class="config-step__content step" data-step="settings">
+          <div class="config-step__card">
+            <h2 class="ap-h3">Report details</h2>
+            <div class="form-row">
+              <label class="lbl" for="rName">Report name</label>
+              <div class="ap-input-group" id="rNameGroup"><input id="rName" placeholder="Name for your report"></div>
+              <span class="ap-form-message error" id="rNameErr" hidden>Enter a report name</span>
+            </div>
+            <div class="form-row">
+              <span class="lbl">Report image (optional)</span>
+              <div class="dropzone"><span class="thumb" id="rThumb"><i class="ap-icon-plus"></i></span>
+                <div style="flex:1"><div id="rImgName">No image yet</div><div class="desc" style="font-size:var(--ref-font-size-xs)">PNG or JPG, square works best</div></div>
+                <button class="ap-button stroked grey" id="rImgBtn"><span>Upload</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="config-step__card">
+            <h2 class="ap-h3">Report timezones</h2>
+            <p class="desc">Define the timezone to be used for the report. You can either use the timezone of your browser or select one from the list.</p>
+            <label class="ap-checkbox-container"><input type="checkbox" id="tzBrowser" checked><i></i><span>Use your browser's timezone <span class="desc" id="tzName"></span></span></label>
+            <div class="ap-select" id="tzSelectWrap" hidden>
+              <div class="ap-select-trigger"><select id="tzSelect">
+                <option>Europe/Paris (UTC+01:00)</option><option>Europe/London (UTC+00:00)</option><option>America/New_York (UTC−05:00)</option>
+                <option>America/Los_Angeles (UTC−08:00)</option><option>Asia/Tokyo (UTC+09:00)</option></select><span class="ap-select-arrow"><i class="ap-icon-chevron-down"></i></span></div>
+            </div>
+          </div>
+          <div class="config-step__card">
+            <h2 class="ap-h3">PDF export configuration</h2>
+            <p class="desc">Your custom report color, logo and author name. Applied to the cover, tab pages and footer of your PDF.</p>
+            <div class="form-row">
+              <label class="lbl" for="rAuthor">Report created by</label>
+              <div class="ap-input-group"><input id="rAuthor" value="Julien Descorps"></div>
+            </div>
+            <div class="form-row"><span class="lbl">Color</span><div class="swatches" id="swatches"></div></div>
+          </div>
+        </div>
+
+        <!-- STEP: options-config (Report configuration) -->
+        <div class="config-step__content step" data-step="config">
+          <div class="config-step__card">
+            <div style="display:flex;align-items:center;gap:8px"><h2 class="ap-h3">Filter by labels</h2><span class="ap-badge grey">Optional</span></div>
+            <p class="desc">Optional defaults applied to every label-eligible widget in your report. You can override any of these per widget later.</p>
+            <div class="label-sentence">Show posts and items that include
+              <select id="lCond"><option value="any">any</option><option value="all">all</option></select> of these labels:</div>
+            <div class="label-box" id="lBox"><input id="lInput" placeholder="Type to search and add labels…"></div>
+            <div class="suggestions" id="lSugg"></div>
+            <span class="desc" id="lHint">Items must have at least one selected label.</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <footer class="foot">
+      <button class="ap-button stroked grey" id="back"><i class="ap-icon-chevron-left"></i><span>Back</span></button>
       <span class="ap-avatar-group" id="stack"></span>
       <span class="count" id="count"></span>
       <a class="ap-link" id="clear" role="button">Clear</a>
       <span class="spacer"></span>
-      <button class="ap-button primary orange" id="next"><span>Next</span><i class="ap-icon-chevron-right"></i></button>
+      <button class="ap-button primary orange" id="next"><span id="nextLabel">Next</span><i class="ap-icon-chevron-right"></i></button>
     </footer>
   </div>
+
+  <!-- REPORT VIEW (Report Studio) -->
+  <div class="report">
+    <header class="r-head">
+      <button class="ap-icon-button" aria-label="Back to reports" id="rBack"><i class="ap-icon-arrow-left"></i></button>
+      <div class="r-title"><span class="pic" id="rPic"><i class="ap-icon-chart-screen"></i></span>
+        <div><h1 class="ap-h2" id="rTitle">Report</h1><div class="meta" id="rMeta"></div></div></div>
+      <span class="spacer"></span>
+      <button class="ap-button stroked grey" id="rModify"><i class="ap-icon-cog"></i><span>Modify report</span></button>
+      <button class="ap-button stroked grey" id="rPdf"><span>Download PDF</span></button>
+      <button class="ap-button primary blue" id="rSave"><span>Save</span></button>
+    </header>
+    <div class="r-bar">
+      <span class="chip"><i class="ap-icon-calendar"></i>Last 30 days<i class="ap-icon-chevron-down"></i></span>
+      <span class="chip" id="rSources"></span>
+      <span class="chip" id="rLabels" hidden></span>
+    </div>
+    <div class="ap-tabs r-tabs"><div class="ap-tabs-nav" id="rTabs"></div></div>
+    <div class="r-body" id="rBody"></div>
+  </div>
 </div>
-<div class="ap-snackbar snack" id="snack"><span>Step 2 is not part of this prototype</span></div>
+
+<!-- Widget library -->
+<aside class="drawer" id="drawer" aria-label="Widget library">
+  <div class="drawer-head"><h2 class="ap-h3">Widget library</h2><span class="spacer"></span><button class="ap-icon-button" id="drawerClose" aria-label="Close"><i class="ap-icon-close"></i></button></div>
+  <div class="drawer-body" id="library"></div>
+</aside>
+
+<div class="ap-snackbar snack" id="snack"><span id="snackText"></span></div>
 
 <script>
 const NET = { facebook:'facebook-official', instagram:'instagram-official', linkedin:'linkedin-official', x:'x-official',
@@ -240,8 +432,7 @@ const UNGROUPED = [
   ['Jck Flap Band 1','Jck Flap Band 1','facebook',1], ['Ibrahima Diaby','Ibrahima Diaby','linkedin'],
 ].map((p,i)=>({ id:`none-${i}`, name:p[0], handle:p[1], net:p[2], off:!!p[3] }));
 
-
-// Other report sources: flat lists, like the "Ad accounts" tab in Team settings
+// ================= other report sources (flat lists, like the "Ad accounts" tab in Team settings) =================
 const mk = (prefix, rows) => rows.map((p,i)=>({ id:`${prefix}-${i}`, name:p[0], handle:p[1], net:p[2], icon:p[3], off:!!p[4] }));
 const AD = mk('ad', [
   ['Agorapulse Ads','act_1029384756','facebook'], ['Agorapulse FR Ads','act_5566778899','facebook'],
@@ -266,42 +457,111 @@ const SOURCES = {
 };
 const itemsOf = k => [...SOURCES[k].groups.flatMap(g=>g.profiles), ...SOURCES[k].items];
 const EVERY = Object.keys(SOURCES).flatMap(itemsOf);
+const byId = id => EVERY.find(x=>x.id===id);
 
-// ---------- prototype settings (cog) — URL wins, then localStorage ----------
+// ================= templates (ReportTemplateId in lib-report-customized) =================
+const META = ['facebook','instagram'];
+const TEMPLATES = [
+  { id:'SINGLE_REPORT', name:'Single profile report', desc:'Template designed for a single profile report', max:1,
+    tabs:['Audience','Posts insights','Community management'], ill:[1,2,2] },
+  { id:'AGGREGATED_BY_NETWORK_REPORT', name:'Aggregated by network report', desc:'Template designed for an aggregated by network report',
+    tabs:['Aggregated','One tab per network'], ill:[3,1,1] },
+  { id:'AGGREGATED_BY_PROFILE_REPORT', name:'Aggregated by profile report', desc:'Template designed for an aggregated by profile report',
+    tabs:['Audience','Posts insights','Community management'], ill:[2,2,1] },
+  { id:'INDIVIDUAL_REPORT', name:'Individual report', desc:'One tab per profile, each holding the full single profile report.',
+    tabs:['One tab per profile'], ill:[1,1,1,1] },
+  { id:'META_SPLIT_ORGANIC_PAID_REPORT', name:'Meta split organic paid', desc:'Provides organic/paid breakdown for Meta profiles. Breakdown by profile.',
+    networks:META, tabs:['Organic vs paid','Posts insights'], ill:[2,1,2] },
+  { id:'AGGREGATED_BY_LABEL_REPORT', name:'Label report', desc:'Turn labels into campaign reports. Track results for any campaign you define',
+    tabs:['Labels'], ill:[1,3] },
+  { id:'TEAM_PERFORMANCE_REPORT', name:'Team performance report', desc:"Compare your team members' activity and results, profile by profile.",
+    tabs:['Team performance'], ill:[2,2] },
+];
+const tplById = id => TEMPLATES.find(t=>t.id===id);
+
+// ================= widget library (widget factories per Category in lib-report-customized) =================
+const LIBRARY = [
+  { id:'audience', title:'Audience', desc:'Daily metrics based on your profiles.', widgets:['Audience growth','Engagement','Engagement rate','Users activity','Views','Reach','Mentions','Video views','Watched time','Label distribution','Sentiment analysis score','Demographics','Profile performance'] },
+  { id:'content', title:'Content', desc:'Lifetime metrics based on your posts.', widgets:['Publishing','Engagement','Reach','Views','Completion rate','Top content','Content performance','Best moment to publish','Best type to publish','Best label to use','Hashtags','Best post'] },
+  { id:'cm', title:'Inbox / CM', desc:'Daily metrics based on your inbox.', widgets:['Inbox items','Replies sent','Reviewed items','Team replies','Team reviews'] },
+  { id:'story', title:'Stories', desc:'Lifetime metrics of your stories.', widgets:['Story publishing','Story reach','Story impressions','Story engagement','Story performance','Story top content'] },
+  { id:'listening', title:'Listening', desc:'Metrics based on listening.', source:'listening', widgets:['Volume','Engagement','Sentiment analysis score','Conversation trends'] },
+  { id:'competitor', title:'Competitors', desc:'Compare your profiles with your competitors.', source:'competitors', widgets:['Benchmark','Audience','Engagement','Engagement per post type','Publishing','Top content','Views'] },
+  { id:'ads', title:'Ads', desc:'Paid metrics based on your ad accounts.', source:'ads', proposal:true, widgets:['Spend','Impressions','Clicks','Cost per result','Paid vs organic reach'] },
+  { id:'roi', title:'ROI', desc:'Traffic your social posts drive to your websites.', widgets:['Traffic','Traffic by post'] },
+  { id:'ai', title:'AI', desc:'AI-powered metrics.', widgets:['Tab AI summary'] },
+  { id:'misc', title:'Miscellaneous', desc:'Other useful widgets (text, title).', widgets:['Title','Text'] },
+];
+const NET_LABEL = { facebook:'Facebook', instagram:'Instagram', linkedin:'LinkedIn', x:'X', tiktok:'TikTok', youtube:'YouTube', threads:'Threads', bluesky:'Bluesky' };
+const SRC_ICON = { listening:'feature-listening', competitors:'target', ads:'megaphone', profiles:'user' };
+
+// ================= state =================
 const store = { get(k){ try { return localStorage.getItem('rpp.'+k); } catch(e){ return null; } },
                 set(k,v){ try { localStorage.setItem('rpp.'+k, v); } catch(e){} } };
 const url = new URLSearchParams(location.search);
 const opts = {
   mode:    url.get('mode') || store.get('mode') || 'profiles',
+  order:   url.get('order') || store.get('order') || 'template',
+  config:  (store.get('config') ?? '1') === '1',
   showOff: (store.get('showOff') ?? '1') === '1',
   openAll: store.get('openAll') === '1',
 };
+const LABELS = ['Campaign Q4','Product launch','Customer care','Giveaway','Employer brand','Events','UGC'];
+let S;
+function resetState(){
+  S = { step:null, template:null, selected:new Set(), tab:'profiles', q:'',
+        open:new Set(opts.openAll ? GROUPS.map(g=>g.id) : ['emoji']),
+        name:'', nameTouched:false, img:null, tzBrowser:true, tz:'Europe/Paris (UTC+01:00)', color:'#178DFE',
+        labels:[], cond:'any', rTab:0, rTabs:[], added:{} };
+  S.step = steps()[0].id;
+}
 
-const selected = new Set();
-let open = new Set(opts.openAll ? GROUPS.map(g=>g.id) : ['emoji']);
-let tab = 'profiles';
-let q = '';
+const steps = () => {
+  const src = { id:'sources', name: opts.mode==='sources' ? 'Sources' : 'Social Profiles' };
+  const tpl = { id:'template', name:'Template' };
+  const list = opts.order==='template' ? [tpl, src] : [src, tpl];
+  list.push({ id:'settings', name:'General information' });
+  if(opts.config) list.push({ id:'config', name:'Report configuration' });
+  return list;
+};
 
-const esc = s => s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// ================= helpers =================
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const initial = s => ([...s.replace(/[^\p{L}\p{N}]/gu,'')][0]||'?').toUpperCase();
-const hl = s => { const e = esc(s); if(!q) return e; const i = s.toLowerCase().indexOf(q); if(i<0) return e;
+const hl = s => { const e = esc(s); const q=S.q; if(!q) return e; const i = s.toLowerCase().indexOf(q); if(i<0) return e;
   return esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length)); };
 const avatar = (p,size=36) => p.icon
   ? `<span class="ap-avatar size-${size} square"><span class="ap-avatar-initials"><i class="ap-icon-${p.icon}"></i></span></span>`
   : `<span class="ap-avatar size-${size}"><span class="ap-avatar-initials">${initial(p.name)}</span>${size>=32?`<span class="ap-avatar-network"><i class="ap-icon-${NET[p.net]}"></i></span>`:''}</span>`;
 const checkbox = (state, attrs='', disabled=false) =>
   `<label class="ap-checkbox-container${state==='some'?' indeterminate':''}" ${attrs}><input type="checkbox" ${state==='all'?'checked':''} ${disabled?'disabled':''}><i></i></label>`;
-const stateOf = list => { const ok = list.filter(p=>!p.off); const n = ok.filter(p=>selected.has(p.id)).length;
-  return n===0?'none':n===ok.length?'all':'some'; };
-const matches = p => (p.name+' '+p.handle).toLowerCase().includes(q);
-const shown = list => opts.showOff ? list : list.filter(p=>!p.off);
-const plural = (n, s) => `${n} ${n>1?s.many:s.one}`;
 const activeSources = () => opts.mode==='sources' ? Object.keys(SOURCES) : ['profiles'];
+const selOf = k => itemsOf(k).filter(p=>S.selected.has(p.id));
+const plural = (n, s) => `${n} ${n>1?s.many:s.one}`;
+const tag = (t, cls='') => `<span class="ap-tag ${cls}"><span>${esc(t)}</span></span>`;
+function snack(t){ $('snackText').textContent = t; const s=$('snack'); s.classList.add('show'); clearTimeout(snack.t); snack.t=setTimeout(()=>s.classList.remove('show'), 2200); }
 
-// ap-team-role-item
-const roleItem = (p, src) => `
-  <div class="team-item-role${p.off?' disconnected':''}">
-    ${checkbox(selected.has(p.id)?'all':'none', `data-p="${p.id}"`, p.off)}
+// template constraints on a profile (real strings: "This template does not support this profile.")
+function blockedReason(p){
+  const t = tplById(S.template);
+  if(!t || !p.net || !p.id.match(/^(beta|real|emoji|none)-/)) return null;
+  if(t.networks && !t.networks.includes(p.net)) return 'This template does not support this profile.';
+  if(t.max && !S.selected.has(p.id) && selOf('profiles').length >= t.max) return 'Maximum number of profiles reached';
+  return null;
+}
+const selectable = p => !p.off && !blockedReason(p);
+const stateOf = list => { const ok = list.filter(p=>!p.off && !(tplById(S.template)?.networks && p.net && !tplById(S.template).networks.includes(p.net)));
+  const n = ok.filter(p=>S.selected.has(p.id)).length; return ok.length===0||n===0?'none':n===ok.length?'all':'some'; };
+const matches = p => (p.name+' '+p.handle).toLowerCase().includes(S.q);
+const shown = list => opts.showOff ? list : list.filter(p=>!p.off);
+
+// ================= STEP: sources =================
+const roleItem = (p, src) => {
+  const reason = !p.off && blockedReason(p);
+  return `
+  <div class="team-item-role${p.off||reason?' disconnected':''}">
+    ${checkbox(S.selected.has(p.id)?'all':'none', `data-p="${p.id}"`, p.off || !!reason)}
     <div class="item-name-container">
       ${avatar(p)}
       <div class="item-name">
@@ -309,47 +569,50 @@ const roleItem = (p, src) => `
         <div class="name"><span class="item-username">${hl(p.handle)}</span></div>
       </div>
     </div>
-    ${p.off?`<span class="tip-anchor"><span class="ap-status red">Disconnected</span><span class="ap-tooltip top-right">${src.offTip}</span></span>`:''}
+    ${p.off?`<span class="tip-anchor"><span class="ap-status red">Disconnected</span><span class="ap-tooltip top-right">${src.offTip}</span></span>`
+      : reason && reason!=='Maximum number of profiles reached' ? `<span class="ap-status grey no-dot">${reason}</span>` : ''}
   </div>`;
+};
 
-function renderTabs(){
-  const wrap = document.getElementById('tabsWrap');
-  wrap.hidden = opts.mode!=='sources';
-  if(wrap.hidden) return;
-  document.getElementById('tabs').innerHTML = Object.entries(SOURCES).map(([k,s])=>{
-    const n = itemsOf(k).filter(p=>selected.has(p.id)).length;
-    return `<button class="ap-tabs-tab${k===tab?' active':''}" role="tab" data-tab="${k}">${s.label}${n?`<span class="ap-counter normal blue">${n}</span>`:''}</button>`;
-  }).join('');
+function addMany(list){ // respects the template's max
+  const t = tplById(S.template);
+  for(const p of list){ if(p.off) continue;
+    if(t?.networks && p.net && p.id.match(/^(beta|real|emoji|none)-/) && !t.networks.includes(p.net)) continue;
+    if(t?.max && itemsOf('profiles').includes(p) && selOf('profiles').length >= t.max){ snack('Maximum number of profiles reached'); break; }
+    S.selected.add(p.id); }
 }
 
-function render(){
-  if(opts.mode!=='sources') tab = 'profiles';
-  const src = SOURCES[tab];
-  renderTabs();
+function renderSources(){
+  if(opts.mode!=='sources') S.tab = 'profiles';
+  const src = SOURCES[S.tab], multi = opts.mode==='sources';
+  const wrap = $('tabsWrap'); wrap.hidden = !multi;
+  if(multi) $('tabs').innerHTML = Object.entries(SOURCES).map(([k,s])=>{
+    const n = selOf(k).length;
+    return `<button class="ap-tabs-tab${k===S.tab?' active':''}" role="tab" data-tab="${k}">${s.label}${n?`<span class="ap-counter normal blue">${n}</span>`:''}</button>`;
+  }).join('');
+  $('title').textContent = multi ? 'Sources' : 'Social profiles';
+  $('subtitle').textContent = multi ? 'Pick what to include in your report: social profiles, ad accounts, Listening searches or competitors.'
+                                    : 'Pick the groups or profiles to include in your report.';
+  $('q').placeholder = src.search; $('allLabel').textContent = src.all;
 
-  // header copy
-  const multi = opts.mode==='sources';
-  document.getElementById('title').textContent = multi ? 'Sources' : 'Social profiles';
-  document.getElementById('subtitle').textContent = multi
-    ? 'Pick what to include in your report: social profiles, ad accounts, Listening searches or competitors.'
-    : 'Pick the groups or profiles to include in your report.';
-  document.getElementById('step1').textContent = multi ? 'Sources' : 'Social Profiles';
-  document.getElementById('q').placeholder = src.search;
-  document.getElementById('allLabel').textContent = src.all;
+  const t = tplById(S.template);
+  $('limitBox').innerHTML = t && (t.max || t.networks) && S.tab==='profiles' ? `
+    <div class="ap-infobox info"><i class="ap-icon-info"></i><div class="ap-infobox-content"><div class="ap-infobox-texts"><span class="ap-infobox-message">
+      ${t.max ? `<b>${t.name}</b>: this template supports up to ${t.max} profile.` : `<b>${t.name}</b>: only Facebook and Instagram profiles are supported.`}
+    </span></div></div></div>` : '';
 
-  // list
   let html = '';
   for(const g of src.groups){
-    const ps = shown(!q || g.name.toLowerCase().includes(q) ? g.profiles : g.profiles.filter(matches));
+    const ps = shown(!S.q || g.name.toLowerCase().includes(S.q) ? g.profiles : g.profiles.filter(matches));
     if(!ps.length) continue;
-    const ok = g.profiles.filter(p=>!p.off), n = ok.filter(p=>selected.has(p.id)).length;
-    const expanded = open.has(g.id) || !!q;
+    const ok = g.profiles.filter(p=>!p.off), n = ok.filter(p=>S.selected.has(p.id)).length;
+    const expanded = S.open.has(g.id) || !!S.q;
     html += `
     <div class="team-menu-group${n?' has-selection':''}">
       <div class="ap-accordion${expanded?'':' collapsed'}">
         <div class="ap-accordion-header" data-toggle="${g.id}">
           <div class="menu-group-title-container">
-            ${checkbox(stateOf(g.profiles), `data-g="${g.id}"`)}
+            ${checkbox(stateOf(g.profiles), `data-g="${g.id}"`, !!t?.max)}
             <div class="menu-group-name-container">
               <i class="ap-icon-folder"></i>
               <span class="menu-group-name">${hl(g.name)}</span>
@@ -363,79 +626,379 @@ function render(){
       </div>
     </div>`;
   }
-  const loose = shown(q ? src.items.filter(matches) : src.items);
+  const loose = shown(S.q ? src.items.filter(matches) : src.items);
   if(loose.length) html += `<div class="profile-roles">${loose.map(p=>roleItem(p,src)).join('')}</div>`;
+  $('list').innerHTML = html ? `<div class="menu-groups-and-profile-roles">${html}</div>` : `
+    <div class="empty-search-container">
+      <div class="empty-search-content"><h2 class="ap-h4">No results found</h2><span>There are no ${src.many} matching “${esc(S.q)}”. Try something else or reset your search.</span></div>
+      <a class="ap-link standalone" role="button" id="reset"><i class="ap-icon-reset"></i>Reset search</a>
+    </div>`;
 
-  document.getElementById('list').innerHTML = html
-    ? `<div class="menu-groups-and-profile-roles">${html}</div>`
-    : `<div class="empty-search-container">
-         <div class="empty-search-content"><h2 class="ap-h4">No results found</h2><span>There are no ${src.many} matching “${esc(q)}”. Try something else or reset your search.</span></div>
-         <a class="ap-link standalone" role="button" id="reset"><i class="ap-icon-reset"></i>Reset search</a>
-       </div>`;
-
-  const items = itemsOf(tab), s = stateOf(items);
-  document.getElementById('allBox').classList.toggle('indeterminate', s==='some');
-  document.getElementById('allInput').checked = s==='all';
-  document.getElementById('allWrap').style.display = q ? 'none' : '';
-
-  // footer: selection across the sources in play
-  const parts = activeSources().map(k=>({ k, n:itemsOf(k).filter(p=>selected.has(p.id)).length })).filter(x=>x.n);
-  const sel = activeSources().flatMap(itemsOf).filter(p=>selected.has(p.id));
-  const c = document.getElementById('count');
-  c.textContent = sel.length ? parts.map(x=>plural(x.n, SOURCES[x.k])).join(', ') + ' selected'
-                             : (multi ? 'Nothing selected yet' : 'No profiles selected yet');
-  c.classList.toggle('zero', !sel.length);
-  // ap-avatar-group renders row-reverse: DOM order is reversed
-  const top = sel.slice(0,5);
-  document.getElementById('stack').innerHTML = (sel.length>5?`<span class="ap-avatar-group-overflow">+${sel.length-5}</span>`:'') + top.reverse().map(p=>avatar(p,24)).join('');
-  document.getElementById('clear').style.display = sel.length ? '' : 'none';
-  document.getElementById('next').disabled = !sel.length;
-  const t = document.getElementById('toggleAll');
-  t.textContent = open.size===GROUPS.length ? 'Collapse all' : 'Expand all';
-  t.style.visibility = (q || !src.groups.length) ? 'hidden' : '';
+  const st = stateOf(itemsOf(S.tab));
+  $('allBox').classList.toggle('indeterminate', st==='some');
+  $('allInput').checked = st==='all';
+  $('allInput').disabled = !!t?.max && S.tab==='profiles';
+  $('allWrap').style.display = S.q ? 'none' : '';
+  const tg = $('toggleAll');
+  tg.textContent = S.open.size===GROUPS.length ? 'Collapse all' : 'Expand all';
+  tg.style.visibility = (S.q || !src.groups.length) ? 'hidden' : '';
 }
 
-document.getElementById('list').addEventListener('click', e => {
-  const g = e.target.closest('[data-g]'), p = e.target.closest('[data-p]'), tg = e.target.closest('[data-toggle]');
-  if(e.target.closest('#reset')){ q=''; document.getElementById('q').value=''; render(); return; }
-  if(g){ e.preventDefault();
-    const grp = GROUPS.find(x=>x.id===g.dataset.g); const all = stateOf(grp.profiles)==='all';
-    grp.profiles.filter(x=>!x.off).forEach(x=> all?selected.delete(x.id):selected.add(x.id)); render(); return; }
-  if(p){ e.preventDefault(); const it = EVERY.find(x=>x.id===p.dataset.p); if(it.off) return;
-    selected.has(it.id)?selected.delete(it.id):selected.add(it.id); render(); return; }
-  if(tg && !q){ const id = tg.dataset.toggle; open.has(id)?open.delete(id):open.add(id); render(); }
-});
-document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(!b) return;
-  tab = b.dataset.tab; q=''; document.getElementById('q').value=''; render(); });
-document.getElementById('allBox').addEventListener('click', e => { e.preventDefault();
-  const items = itemsOf(tab), all = stateOf(items)==='all';
-  items.filter(p=>!p.off).forEach(p=> all?selected.delete(p.id):selected.add(p.id)); render(); });
-document.getElementById('q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
-document.getElementById('toggleAll').addEventListener('click', () => {
-  if(open.size===GROUPS.length) open.clear(); else GROUPS.forEach(g=>open.add(g.id)); render(); });
-document.getElementById('clear').addEventListener('click', () => { activeSources().flatMap(itemsOf).forEach(p=>selected.delete(p.id)); render(); });
-document.getElementById('next').addEventListener('click', () => { const s = document.getElementById('snack');
-  s.classList.add('show'); setTimeout(()=>s.classList.remove('show'), 1800); });
+// ================= STEP: template =================
+const ill = rows => `<div class="edit-template__card-illustration" style="grid-template-rows:repeat(${rows.length},1fr)">${
+  rows.map((n,r)=>`<div style="display:grid;grid-template-columns:repeat(${n},1fr);gap:4px">${Array.from({length:n},(_,i)=>`<span class="${r===0&&i===0?'accent':''}"></span>`).join('')}</div>`).join('')}</div>`;
 
-// ---------- cog menu ----------
-const cog = document.getElementById('cog'), menu = document.getElementById('protoMenu');
+function templateBlock(t){
+  // only checked when profiles were picked before the template
+  if(opts.order!=='sources') return null;
+  const prof = selOf('profiles');
+  if(t.max && prof.length > t.max) return `Select only ${t.max} profile to use this template`;
+  if(t.networks && prof.length && !prof.some(p=>t.networks.includes(p.net))) return 'Needs at least one Facebook or Instagram profile';
+  return null;
+}
+function extraTabs(){ // tabs added automatically by the extra sources (multi-source mode)
+  if(opts.mode!=='sources') return [];
+  return [['listening','Listening'],['competitors','Competitors'],['ads','Ads']].filter(([k])=>selOf(k).length || opts.order==='template').map(([k,l])=>({k,l}));
+}
+function renderTemplate(){
+  const extra = extraTabs();
+  const extraTags = extra.map(x=>tag('+ '+x.l + (opts.order==='template' ? ' (if selected)' : ''), 'blue mini')).join('');
+  $('scratchSlot').innerHTML = `
+    <button type="button" class="edit-template__card scratch${S.template==='SCRATCH'?' selected':''}" data-tpl="SCRATCH">
+      ${ill([1])}<div><h3>Scratch</h3><p class="edit-template__card-description">Begin with a blank state and add your widgets.</p></div>
+    </button>`;
+  $('templates').innerHTML = TEMPLATES.map(t=>{
+    const block = templateBlock(t);
+    return `<button type="button" class="edit-template__card${S.template===t.id?' selected':''}" data-tpl="${t.id}" ${block?'disabled':''}>
+      ${S.template===t.id?'<span class="card-corner ap-status blue no-dot">Selected</span>':''}
+      ${ill(t.ill)}
+      <div><h3>${t.name}</h3><p class="edit-template__card-description">${block ? block : t.desc}</p></div>
+      <div class="card-tabs">${t.tabs.map(x=>tag(x,'grey mini')).join('')}${extraTags}</div>
+    </button>`;
+  }).join('');
+}
+
+// ================= STEP: settings & config =================
+const COLORS = ['#178DFE','#FF5A1F','#2EB67D','#7B61FF','#344563'];
+function renderSettings(){
+  if(!S.nameTouched && !S.name){
+    const t = S.template==='SCRATCH' ? 'Custom report' : (tplById(S.template)?.name || 'Report');
+    $('rName').placeholder = `e.g. ${t} – ${new Date().toLocaleString('en',{month:'long'})}`;
+  }
+  $('rName').value = S.name;
+  const err = S.nameTouched && !S.name.trim();
+  $('rNameErr').hidden = !err; $('rNameGroup').classList.toggle('invalid', err);
+  $('rImgName').textContent = S.img || 'No image yet';
+  $('rThumb').innerHTML = S.img ? '<i class="ap-icon-chart-screen"></i>' : '<i class="ap-icon-plus"></i>';
+  $('tzName').textContent = '(' + (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Paris') + ')';
+  $('tzBrowser').checked = S.tzBrowser; $('tzSelectWrap').hidden = S.tzBrowser;
+  $('swatches').innerHTML = COLORS.map(c=>`<span class="swatch${c===S.color?' on':''}" style="background:${c}" data-color="${c}"></span>`).join('');
+}
+function renderConfig(){
+  $('lCond').value = S.cond;
+  $('lHint').textContent = S.cond==='all' ? 'Items must have every selected label.' : 'Items must have at least one selected label.';
+  $('lBox').querySelectorAll('.ap-tag').forEach(n=>n.remove());
+  $('lBox').insertAdjacentHTML('afterbegin', S.labels.map(l=>`<span class="ap-tag blue"><span>${esc(l)}</span><i class="ap-icon-close x" data-unlabel="${esc(l)}"></i></span>`).join(''));
+  const q = $('lInput').value.trim().toLowerCase();
+  $('lSugg').innerHTML = LABELS.filter(l=>!S.labels.includes(l) && l.toLowerCase().includes(q)).map(l=>`<span class="ap-tag grey" data-label="${esc(l)}"><span>+ ${esc(l)}</span></span>`).join('');
+}
+
+// ================= stepper / footer / navigation =================
+function stepOk(id){
+  if(id==='template') return !!S.template;
+  if(id==='sources') return activeSources().some(k=>selOf(k).length);
+  if(id==='settings') return !!S.name.trim();
+  return true;
+}
+function reachable(id){ const st = steps(); const i = st.findIndex(s=>s.id===id); return st.slice(0,i).every(s=>stepOk(s.id)); }
+
+function renderStepper(){
+  const st = steps(), cur = st.findIndex(s=>s.id===S.step);
+  $('stepper').innerHTML = st.map((s,i)=>{
+    const cls = i===cur ? 'active' : (i<cur || stepOk(s.id)) && reachable(s.id) ? 'completed clickable' : 'pending' + (reachable(s.id)?' clickable':'');
+    return (i?'<span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>':'') +
+      `<div class="ap-stepper-item ${cls}" data-step-go="${s.id}"><span>${i<cur && stepOk(s.id) ? '<i class="ap-icon-check"></i>' : i+1}</span><span>${s.name}</span></div>`;
+  }).join('');
+}
+
+function renderFooter(){
+  const st = steps(), i = st.findIndex(s=>s.id===S.step), last = i===st.length-1;
+  $('back').style.visibility = i===0 ? 'hidden' : '';
+  const sel = activeSources().flatMap(selOf);
+  const onSources = S.step==='sources';
+  $('stack').style.display = $('count').style.display = sel.length || onSources ? '' : 'none';
+  const parts = activeSources().map(k=>({k,n:selOf(k).length})).filter(x=>x.n);
+  $('count').textContent = sel.length ? parts.map(x=>plural(x.n, SOURCES[x.k])).join(', ') + ' selected'
+                                      : (opts.mode==='sources' ? 'Nothing selected yet' : 'No profiles selected yet');
+  $('count').classList.toggle('zero', !sel.length);
+  const top = sel.slice(0,5);
+  $('stack').innerHTML = (sel.length>5?`<span class="ap-avatar-group-overflow">+${sel.length-5}</span>`:'') + top.slice().reverse().map(p=>avatar(p,24)).join('');
+  $('clear').style.display = sel.length && onSources ? '' : 'none';
+  $('nextLabel').textContent = last ? 'Build report' : 'Next';
+  $('next').disabled = S.step==='settings' ? false : !stepOk(S.step);
+}
+
+function render(){
+  document.querySelectorAll('.step').forEach(el=>el.style.display = el.dataset.step===S.step ? '' : 'none');
+  renderStepper();
+  if(S.step==='sources') renderSources();
+  if(S.step==='template') renderTemplate();
+  if(S.step==='settings') renderSettings();
+  if(S.step==='config') renderConfig();
+  renderFooter();
+}
+function go(id){ S.step = id; S.q=''; $('q').value=''; $('scroll').scrollTop = 0; render(); }
+
+$('next').addEventListener('click', () => {
+  if(S.step==='settings' && !S.name.trim()){ S.nameTouched = true; renderSettings(); snack('Please fix the highlighted errors to continue.'); return; }
+  const st = steps(), i = st.findIndex(s=>s.id===S.step);
+  if(i < st.length-1) go(st[i+1].id); else buildReport();
+});
+$('back').addEventListener('click', () => { const st = steps(), i = st.findIndex(s=>s.id===S.step); if(i>0) go(st[i-1].id); });
+$('stepper').addEventListener('click', e => { const s = e.target.closest('[data-step-go]'); if(s && reachable(s.dataset.stepGo)) go(s.dataset.stepGo); });
+$('quit').addEventListener('click', () => snack('Leave report creation? Leaving now will cancel the creation.'));
+
+// sources events
+$('list').addEventListener('click', e => {
+  const g = e.target.closest('[data-g]'), p = e.target.closest('[data-p]'), tg = e.target.closest('[data-toggle]');
+  if(e.target.closest('#reset')){ S.q=''; $('q').value=''; render(); return; }
+  if(g){ e.preventDefault(); if(tplById(S.template)?.max) return;
+    const grp = GROUPS.find(x=>x.id===g.dataset.g);
+    if(stateOf(grp.profiles)==='all') grp.profiles.forEach(x=>S.selected.delete(x.id)); else addMany(grp.profiles);
+    render(); return; }
+  if(p){ e.preventDefault(); const it = byId(p.dataset.p);
+    if(S.selected.has(it.id)) S.selected.delete(it.id); else if(selectable(it)) S.selected.add(it.id);
+    render(); return; }
+  if(tg && !S.q){ const id = tg.dataset.toggle; S.open.has(id)?S.open.delete(id):S.open.add(id); render(); }
+});
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(!b) return; S.tab = b.dataset.tab; S.q=''; $('q').value=''; render(); });
+$('allBox').addEventListener('click', e => { e.preventDefault(); if($('allInput').disabled) return;
+  const items = itemsOf(S.tab); if(stateOf(items)==='all') items.forEach(p=>S.selected.delete(p.id)); else addMany(items); render(); });
+$('q').addEventListener('input', e => { S.q = e.target.value.trim().toLowerCase(); render(); });
+$('toggleAll').addEventListener('click', () => { if(S.open.size===GROUPS.length) S.open.clear(); else GROUPS.forEach(g=>S.open.add(g.id)); render(); });
+$('clear').addEventListener('click', () => { activeSources().flatMap(itemsOf).forEach(p=>S.selected.delete(p.id)); render(); });
+
+// template events
+document.querySelector('[data-step=template]').addEventListener('click', e => {
+  const c = e.target.closest('[data-tpl]'); if(!c || c.disabled) return;
+  S.template = c.dataset.tpl;
+  // keep the selection valid for the new template
+  const t = tplById(S.template);
+  if(t?.networks) selOf('profiles').filter(p=>!t.networks.includes(p.net)).forEach(p=>S.selected.delete(p.id));
+  if(t?.max) selOf('profiles').slice(t.max).forEach(p=>S.selected.delete(p.id));
+  render();
+});
+// settings events
+$('rName').addEventListener('input', e => { S.name = e.target.value; S.nameTouched = true; renderFooter(); renderStepper(); $('rNameErr').hidden = !!S.name.trim(); $('rNameGroup').classList.toggle('invalid', !S.name.trim()); });
+$('rImgBtn').addEventListener('click', () => { S.img = S.img ? null : 'agorapulse-logo.png'; renderSettings(); });
+$('tzBrowser').addEventListener('change', e => { S.tzBrowser = e.target.checked; renderSettings(); });
+$('tzSelect').addEventListener('change', e => { S.tz = e.target.value; });
+$('swatches').addEventListener('click', e => { const s = e.target.closest('[data-color]'); if(s){ S.color = s.dataset.color; renderSettings(); } });
+// config events
+$('lCond').addEventListener('change', e => { S.cond = e.target.value; renderConfig(); });
+$('lInput').addEventListener('input', renderConfig);
+$('lInput').addEventListener('keydown', e => { if(e.key==='Enter' && e.target.value.trim()){ const v = e.target.value.trim(); if(!S.labels.includes(v)) S.labels.push(v); e.target.value=''; renderConfig(); } });
+$('lSugg').addEventListener('click', e => { const t = e.target.closest('[data-label]'); if(t){ S.labels.push(t.dataset.label); $('lInput').value=''; renderConfig(); } });
+$('lBox').addEventListener('click', e => { const x = e.target.closest('[data-unlabel]'); if(x){ S.labels = S.labels.filter(l=>l!==x.dataset.unlabel); renderConfig(); } });
+
+// ================= REPORT VIEW =================
+// deterministic fake data
+const seed = s => { let h = 2166136261; for(const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ (h>>>15), 2246822507) ^ Math.imul(h ^ (h>>>13), 3266489909)) >>> 0) / 4294967296; };
+const fmt = n => n>=1e6 ? (n/1e6).toFixed(1)+'M' : n>=1e3 ? (n/1e3).toFixed(1)+'k' : String(Math.round(n));
+function spark(r, kind){
+  const N = kind==='bars' ? 12 : 30, v = Array.from({length:N}, (_,i)=> 30 + 40*r() + i*(kind==='bars'?0:1.2));
+  const max = Math.max(...v), W = 300, H = 90;
+  if(kind==='bars') return `<svg class="w-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${v.map((x,i)=>{ const h = x/max*(H-6), w = W/N-6;
+    return `<rect x="${i*(W/N)+3}" y="${H-h}" width="${w}" height="${h}" rx="3" fill="var(--ref-color-electric-blue-${i===N-1?100:40})"/>`; }).join('')}</svg>`;
+  const pts = v.map((x,i)=>`${(i/(N-1)*W).toFixed(1)},${(H-4-x/max*(H-12)).toFixed(1)}`).join(' ');
+  return `<svg class="w-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polygon points="0,${H} ${pts} ${W},${H}" fill="var(--ref-color-electric-blue-10)"/><polyline points="${pts}" fill="none" stroke="var(--ref-color-electric-blue-100)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function srcChips(list){ return `<div class="w-sources">${list.slice(0,3).map(p=>`<span class="ap-tag grey mini"><span>${esc(p.name)}</span></span>`).join('')}${list.length>3?`<span class="ap-tag grey mini"><span>+${list.length-3}</span></span>`:''}</div>`; }
+
+// one widget card. src: which source feeds it ('profiles' | 'listening' | 'competitors' | 'ads')
+function widget(title, { src='profiles', kind='line', size='', subtitle='', isNew=false, proposal=false, scope=null }={}){
+  const pool = scope || selOf(src);
+  const r = seed(title + src + pool.map(p=>p.id).join());
+  const head = `<div class="w-head"><div><div class="t">${esc(title)}${proposal?' <span class="ap-badge orange">New</span>':''}</div><div class="s">${subtitle || (src==='profiles' ? plural(pool.length, SOURCES.profiles) : plural(pool.length, SOURCES[src]))}</div></div><span class="spacer"></span><button class="ap-icon-button" aria-label="Widget options"><i class="ap-icon-more"></i></button></div>`;
+  if(!pool.length){
+    // the widget needs a source the report doesn't have: today's behaviour = pick it inside the widget
+    const s = SOURCES[src];
+    const inSources = opts.mode==='sources';
+    return `<div class="widget ${size}${isNew?' new':''}">${head.replace(/<div class="s">.*?<\/div>/, `<div class="s">No ${s.one} selected</div>`)}
+      <div class="w-empty"><i class="ap-icon-${SRC_ICON[src]}"></i><span>${inSources ? `This report has no ${s.many} yet.` : `Select the ${s.many} to display in this widget.`}</span>
+        ${inSources ? `<a class="ap-link standalone" role="button" data-add-source="${src}">Add ${s.many} to the report</a>`
+                    : `<button class="ap-button stroked grey" data-pick-in-widget="${src}"><span>Select ${s.many}</span></button>`}</div></div>`;
+  }
+  let body = '';
+  const total = 1000 + r()*90000, delta = (r()*30-8).toFixed(1);
+  if(kind==='list'){
+    const rows = pool.slice(0,5).map(p=>({p, v: 200 + r()*8000})).sort((a,b)=>b.v-a.v), max = rows[0].v;
+    body = `<div class="w-list">${rows.map(x=>`<div class="row">${avatar(x.p,24)}<span style="min-width:110px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.p.name)}</span><span class="bar" style="width:${Math.round(x.v/max*120)}px"></span><span class="n">${fmt(x.v)}</span></div>`).join('')}</div>`;
+  } else if(kind==='kpi'){
+    body = `<div class="w-kpi">${fmt(total)}</div><div class="w-delta${delta<0?' down':''}">${delta<0?'':'+'}${delta}% vs previous period</div>`;
+  } else {
+    body = `<div style="display:flex;align-items:baseline;gap:8px"><div class="w-kpi">${fmt(total)}</div><div class="w-delta${delta<0?' down':''}">${delta<0?'':'+'}${delta}%</div></div>${spark(r, kind)}`;
+  }
+  if(src!=='profiles') body = srcChips(pool) + body;
+  return `<div class="widget ${size}${isNew?' new':''}">${head}${body}</div>`;
+}
+
+// tabs built from the template + the extra sources
+function buildTabs(){
+  const prof = selOf('profiles'), t = S.template, tabs = [];
+  const audience = (scope, title='Audience') => ({ name:title, html:() => [
+    `<div class="section-title">Overview</div>`,
+    widget('Audience growth',{kind:'line',size:'w2',scope}), widget('Engagement',{kind:'kpi',scope}), widget('Engagement rate',{kind:'kpi',scope}),
+    widget('Reach',{kind:'bars',size:'w2',scope}), widget('Views',{kind:'line',size:'w2',scope}),
+    `<div class="section-title">Activity</div>`,
+    widget('Users activity',{kind:'bars',size:'w2',scope}), widget('Mentions',{kind:'kpi',scope}), widget('Sentiment analysis score',{kind:'kpi',scope}),
+    ...(scope.length>1 ? [widget('Profile performance',{kind:'list',size:'w4',scope})] : []) ] });
+  const posts = (scope, title='Posts insights') => ({ name:title, html:() => [
+    widget('Publishing',{kind:'bars',size:'w2',scope}), widget('Engagement',{kind:'line',size:'w2',scope}),
+    widget('Top content',{kind:'list',size:'w2',scope}), widget('Best moment to publish',{kind:'bars',size:'w2',scope}),
+    widget('Best type to publish',{kind:'kpi',scope}), widget('Hashtags',{kind:'kpi',scope}) ] });
+  const cm = (scope) => ({ name:'Community management', html:() => [
+    widget('Inbox items',{kind:'line',size:'w2',scope}), widget('Replies sent',{kind:'kpi',scope}), widget('Reviewed items',{kind:'kpi',scope}),
+    widget('Team replies',{kind:'list',size:'w2',scope}), widget('Team reviews',{kind:'list',size:'w2',scope}) ] });
+
+  if(t==='SCRATCH') tabs.push({ name:'Tab 1', html:() => [] });
+  else if(t==='SINGLE_REPORT' || t==='AGGREGATED_BY_PROFILE_REPORT') tabs.push(audience(prof), posts(prof), cm(prof));
+  else if(t==='AGGREGATED_BY_NETWORK_REPORT'){
+    tabs.push(audience(prof,'Aggregated'));
+    [...new Set(prof.map(p=>p.net))].forEach(n => { const sc = prof.filter(p=>p.net===n); tabs.push({ ...audience(sc), name:NET_LABEL[n], icon:NET[n] }); });
+  }
+  else if(t==='INDIVIDUAL_REPORT') prof.forEach(p => tabs.push({ ...audience([p]), name:p.name, icon:NET[p.net] }));
+  else if(t==='META_SPLIT_ORGANIC_PAID_REPORT') tabs.push({ name:'Organic vs paid', html:() => [
+      widget('Reach — organic',{kind:'line',size:'w2',scope:prof}), widget('Reach — paid',{kind:'line',size:'w2',scope:prof}),
+      widget('Engagement — organic',{kind:'kpi',scope:prof}), widget('Engagement — paid',{kind:'kpi',scope:prof}), widget('Profile performance',{kind:'list',size:'w2',scope:prof}) ] }, posts(prof));
+  else if(t==='AGGREGATED_BY_LABEL_REPORT') tabs.push({ name:'Labels', html:() => [
+      widget('Label distribution',{kind:'list',size:'w2',scope:prof,subtitle:S.labels.length?S.labels.join(', '):'All labels'}), widget('Best label to use',{kind:'kpi',scope:prof}), widget('Engagement',{kind:'kpi',scope:prof}),
+      widget('Content performance',{kind:'bars',size:'w4',scope:prof}) ] });
+  else if(t==='TEAM_PERFORMANCE_REPORT') tabs.push({ name:'Team performance', html:() => [
+      widget('Team replies',{kind:'list',size:'w2',scope:prof}), widget('Team reviews',{kind:'list',size:'w2',scope:prof}),
+      widget('Replies sent',{kind:'kpi',scope:prof}), widget('Reviewed items',{kind:'kpi',scope:prof}), widget('Inbox items',{kind:'line',size:'w2',scope:prof}) ] });
+
+  // extra sources (multi-source mode): each one brings its own tab, prefilled
+  if(opts.mode==='sources'){
+    if(selOf('listening').length) tabs.push({ name:'Listening', icon:'feature-listening', html:() => [
+      widget('Volume',{src:'listening',kind:'line',size:'w2'}), widget('Engagement',{src:'listening',kind:'kpi'}), widget('Sentiment analysis score',{src:'listening',kind:'kpi'}),
+      widget('Conversation trends',{src:'listening',kind:'list',size:'w4'}) ] });
+    if(selOf('competitors').length) tabs.push({ name:'Competitors', icon:'target', html:() => [
+      widget('Benchmark',{src:'competitors',kind:'list',size:'w2'}), widget('Audience',{src:'competitors',kind:'bars',size:'w2'}),
+      widget('Engagement',{src:'competitors',kind:'kpi'}), widget('Publishing',{src:'competitors',kind:'kpi'}), widget('Top content',{src:'competitors',kind:'list',size:'w2'}) ] });
+    if(selOf('ads').length) tabs.push({ name:'Ads', icon:'megaphone', proposal:true, html:() => [
+      widget('Spend',{src:'ads',kind:'kpi',proposal:true}), widget('Impressions',{src:'ads',kind:'kpi',proposal:true}), widget('Clicks',{src:'ads',kind:'line',size:'w2',proposal:true}),
+      widget('Cost per result',{src:'ads',kind:'bars',size:'w2',proposal:true}), widget('Paid vs organic reach',{src:'ads',kind:'line',size:'w2',proposal:true}) ] });
+  }
+  return tabs;
+}
+
+function buildReport(){
+  S.rTabs = buildTabs(); S.rTab = 0; S.added = {};
+  $('app').classList.add('view-report');
+  renderReport();
+}
+function renderReport(){
+  $('rTitle').textContent = S.name.trim() || 'Untitled report';
+  $('rMeta').textContent = `Created today by ${$('rAuthor').value || 'Julien Descorps'} · ${S.template==='SCRATCH' ? 'Scratch' : tplById(S.template).name}`;
+  $('rPic').style.background = S.img ? S.color : '';
+  $('rPic').style.color = S.img ? '#fff' : '';
+  const parts = activeSources().map(k=>({k,n:selOf(k).length})).filter(x=>x.n);
+  const sel = activeSources().flatMap(selOf);
+  $('rSources').innerHTML = `<span class="ap-avatar-group">${sel.slice(0,4).reverse().map(p=>avatar(p,24)).join('')}</span>${parts.map(x=>plural(x.n,SOURCES[x.k])).join(' · ')}`;
+  $('rLabels').hidden = !S.labels.length;
+  $('rLabels').innerHTML = `<i class="ap-icon-tag"></i>Labels (${S.cond}): ${S.labels.map(esc).join(', ')}`;
+  $('rTabs').innerHTML = S.rTabs.map((t,i)=>`<button class="ap-tabs-tab${i===S.rTab?' active':''}" data-rtab="${i}">${t.icon?`<i class="ap-icon-${t.icon}"></i>`:''}${esc(t.name)}${t.proposal?' <span class="ap-badge orange">New</span>':''}</button>`).join('')
+    + `<button class="ap-tabs-tab" id="addTab"><i class="ap-icon-plus"></i>Add tab</button>`;
+  const tab = S.rTabs[S.rTab];
+  const added = (S.added[S.rTab]||[]).map(a => a.html);
+  const cards = [...tab.html(), ...added];
+  const extraNote = opts.mode==='sources' && activeSources().slice(1).some(k=>selOf(k).length)
+    ? 'Listening, Competitors and Ads widgets are prefilled with the sources picked when creating the report.'
+    : 'Listening and Competitors widgets ask you to pick their searches or competitors one widget at a time.';
+  $('rBody').innerHTML = `
+    <div class="r-tab-tools"><span class="hint">${extraNote}</span><span class="spacer"></span>
+      <button class="ap-button stroked grey" id="tabConfig"><i class="ap-icon-cog"></i><span>Tab configuration</span></button>
+      <button class="ap-button primary blue" id="openLib"><i class="ap-icon-plus"></i><span>Add widgets</span></button></div>
+    ${cards.length ? `<div class="grid">${cards.join('')}</div>` : `
+      <div class="report-empty"><h2 class="ap-h3">Your report is empty</h2><p>Open the widget library to add metrics. Widgets use the sources you picked for this report.</p>
+        <button class="ap-button primary blue" data-open-lib><i class="ap-icon-plus"></i><span>Add widgets</span></button></div>`}`;
+}
+$('rTabs').addEventListener('click', e => {
+  if(e.target.closest('#addTab')){ S.rTabs.push({ name:`Tab ${S.rTabs.length+1}`, html:()=>[] }); S.rTab = S.rTabs.length-1; renderReport(); return; }
+  const b = e.target.closest('[data-rtab]'); if(b){ S.rTab = +b.dataset.rtab; renderReport(); }
+});
+$('rBody').addEventListener('click', e => {
+  if(e.target.closest('#openLib') || e.target.closest('[data-open-lib]')){ openLibrary(); return; }
+  if(e.target.closest('#tabConfig')){ snack('Tab configuration: choose the social profiles and label filter for this tab (not part of this prototype)'); return; }
+  const add = e.target.closest('[data-add-source]');
+  if(add){ $('app').classList.remove('view-report'); S.tab = add.dataset.addSource; go('sources'); snack(`Pick ${SOURCES[S.tab].many}, then build the report again`); return; }
+  if(e.target.closest('[data-pick-in-widget]')) snack('Today: the selection opens in the widget editor, one widget at a time');
+});
+$('rBack').addEventListener('click', () => snack('Back to the reports list (not part of this prototype)'));
+$('rModify').addEventListener('click', () => { $('app').classList.remove('view-report'); go(steps()[0].id); });
+$('rPdf').addEventListener('click', () => snack('PDF export (not part of this prototype)'));
+$('rSave').addEventListener('click', () => snack('Report saved'));
+
+// widget library
+function openLibrary(){
+  $('library').innerHTML = LIBRARY.filter(c => !c.proposal || opts.mode==='sources').map((c,ci) => {
+    let note = '';
+    if(c.source){
+      const n = selOf(c.source).length, s = SOURCES[c.source];
+      note = opts.mode==='sources'
+        ? (n ? `Prefilled with your ${plural(n, s)}` : `No ${s.one} in this report yet: you'll pick them in each widget`)
+        : `You'll pick the ${s.many} in each widget`;
+    }
+    return `<div class="ap-accordion lib-cat${ci<1?'':' collapsed'}">
+      <div class="ap-accordion-header" data-cat><div class="ap-accordion-title">${c.title}${c.proposal?' <span class="ap-badge orange">New</span>':''}<div class="cat-desc">${c.desc}</div></div>
+        <button class="ap-icon-button ap-accordion-toggle"><i class="ap-icon-chevron-up"></i></button></div>
+      <div class="ap-accordion-content">
+        ${note?`<div class="lib-note">${note}</div>`:''}
+        ${c.widgets.map(w=>`<button class="lib-item" data-add-widget="${esc(w)}" data-cat-id="${c.id}"><i class="ap-icon-${c.source?SRC_ICON[c.source]:'chart-screen'}"></i><span>${esc(w)}</span><span class="spacer"></span><i class="ap-icon-plus"></i></button>`).join('')}
+      </div></div>`;
+  }).join('');
+  $('drawer').classList.add('open');
+}
+$('drawerClose').addEventListener('click', () => $('drawer').classList.remove('open'));
+$('library').addEventListener('click', e => {
+  const h = e.target.closest('[data-cat]'); if(h){ h.parentElement.classList.toggle('collapsed'); return; }
+  const w = e.target.closest('[data-add-widget]'); if(!w) return;
+  const cat = LIBRARY.find(c=>c.id===w.dataset.catId);
+  const src = cat.source || 'profiles';
+  // multi-source mode: prefilled; profiles-only: Listening/Competitors start empty (picked in the widget)
+  const scope = opts.mode==='sources' || src==='profiles' ? null : [];
+  const html = widget(w.dataset.addWidget, { src, kind: ['list','kpi','line','bars'][w.dataset.addWidget.length%4], size: w.dataset.addWidget.length%3?'w2':'', isNew:true, proposal:cat.proposal, scope });
+  (S.added[S.rTab] ||= []).push({ html });
+  renderReport();
+  snack(`“${w.dataset.addWidget}” added to ${S.rTabs[S.rTab].name}`);
+  setTimeout(()=>{ const all = $('rBody').querySelectorAll('.widget'); all[all.length-1]?.scrollIntoView({behavior:'smooth',block:'center'}); }, 30);
+});
+
+// ================= cog menu =================
+const cog = $('cog'), menu = $('protoMenu');
 function syncMenu(){
   menu.querySelectorAll('input[name=mode]').forEach(r => r.checked = r.value===opts.mode);
-  document.getElementById('optOff').checked = opts.showOff;
-  document.getElementById('optOpen').checked = opts.openAll;
+  menu.querySelectorAll('input[name=order]').forEach(r => r.checked = r.value===opts.order);
+  $('optConfig').checked = opts.config; $('optOff').checked = opts.showOff; $('optOpen').checked = opts.openAll;
 }
 cog.addEventListener('click', e => { e.stopPropagation(); menu.hidden = !menu.hidden; cog.setAttribute('aria-expanded', String(!menu.hidden)); syncMenu(); });
 document.addEventListener('click', e => { if(!menu.hidden && !menu.contains(e.target)) { menu.hidden = true; cog.setAttribute('aria-expanded','false'); } });
-document.addEventListener('keydown', e => { if(e.key==='Escape') menu.hidden = true; });
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ menu.hidden = true; $('drawer').classList.remove('open'); } });
+function setUrl(k,v){ const u = new URL(location.href); u.searchParams.set(k, v); history.replaceState(null,'',u); }
 menu.addEventListener('change', e => {
   const t = e.target;
-  if(t.name==='mode'){ opts.mode = t.value; store.set('mode', t.value);
-    const u = new URL(location.href); u.searchParams.set('mode', t.value); history.replaceState(null,'',u); q=''; document.getElementById('q').value=''; }
+  if(t.name==='mode'){ opts.mode = t.value; store.set('mode', t.value); setUrl('mode', t.value); S.q=''; $('q').value=''; }
+  if(t.name==='order'){ opts.order = t.value; store.set('order', t.value); setUrl('order', t.value); }
+  if(t.id==='optConfig'){ opts.config = t.checked; store.set('config', t.checked?'1':'0'); if(!opts.config && S.step==='config') S.step='settings'; }
   if(t.id==='optOff'){ opts.showOff = t.checked; store.set('showOff', t.checked?'1':'0'); }
-  if(t.id==='optOpen'){ opts.openAll = t.checked; store.set('openAll', t.checked?'1':'0');
-    open = new Set(t.checked ? GROUPS.map(g=>g.id) : ['emoji']); }
-  render();
+  if(t.id==='optOpen'){ opts.openAll = t.checked; store.set('openAll', t.checked?'1':'0'); S.open = new Set(t.checked ? GROUPS.map(g=>g.id) : ['emoji']); }
+  if($('app').classList.contains('view-report')){ S.rTabs = buildTabs(); S.rTab = Math.min(S.rTab, S.rTabs.length-1); renderReport(); }
+  else render();
 });
+$('restart').addEventListener('click', () => { resetState(); $('app').classList.remove('view-report'); $('drawer').classList.remove('open'); menu.hidden = true; go(steps()[0].id); });
+
+resetState();
 render();
 </script>
 </body>
