@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report profile picker — Agorapulse prototype</title>
+<!-- Real Agorapulse design system, linked from its public jsDelivr CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@agorapulse/ui-theme@22.0.7/assets/desktop_variables.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@agorapulse/ui-theme@22.0.7/assets/style/css-ui/font-face.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@agorapulse/ui-symbol@22.0.0/icons/ap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@agorapulse/ui-theme@22.0.7/assets/style/css-ui/index.css">
+<style>
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; }
+  body {
+    background:var(--ref-color-grey-05,#F4F5F7);
+    color:var(--ref-color-grey-100,#344563);
+    font-family:var(--ref-font-family,'Averta'),-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:14px; line-height:1.4; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p { margin:0; }
+  button { font-family:inherit; }
+
+  .app { display:grid; grid-template-columns:206px 1fr; height:100vh; }
+
+  /* ---------- left nav ---------- */
+  .nav { background:#fff; border-right:1px solid var(--ref-color-grey-10,#EAECEF); display:flex; flex-direction:column; padding:10px 8px; overflow:auto; }
+  .logo { font-weight:800; font-size:21px; letter-spacing:-.03em; color:var(--ref-color-orange-100,#FF5A1F); padding:2px 4px 10px; }
+  .wsp { display:flex; align-items:center; gap:8px; border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-md,8px); padding:6px 8px; font-size:13px; margin-bottom:10px; }
+  .wsp .num { width:24px; height:24px; border-radius:4px; background:#4A86C5; color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .navitem { display:flex; align-items:center; gap:10px; padding:10px; border-radius:var(--ref-border-radius-md,8px); color:var(--ref-color-grey-100); font-size:15px; }
+  .navitem i { font-size:16px; } .navitem .chev { margin-left:auto; font-size:14px; color:var(--ref-color-grey-80); }
+  .navitem.open { font-weight:700; }
+  .subitem { padding:9px 10px 9px 36px; border-radius:var(--ref-border-radius-md,8px); color:var(--ref-color-grey-80); font-size:15px; }
+  .subitem.active { background:var(--ref-color-electric-blue-10,#E8F3FF); color:var(--ref-color-electric-blue-100,#178DFE); font-weight:700; }
+  .nav .grow { flex:1; }
+  .nav .ap-button { width:100%; justify-content:center; margin:10px 0; }
+  .user { display:flex; align-items:center; gap:8px; border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-md,8px); padding:6px 8px; font-size:13px; margin-top:6px; }
+
+  /* ---------- main ---------- */
+  .main { display:flex; flex-direction:column; min-width:0; height:100vh; }
+  .head { display:flex; align-items:center; gap:16px; height:64px; padding:0 28px; background:#fff; border-bottom:1px solid var(--ref-color-grey-10); flex-shrink:0; }
+  .head h1 { font-size:22px; font-weight:700; }
+  .head .back { color:var(--ref-color-grey-80); font-size:18px; }
+  .proto-badge { margin-left:auto; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ref-color-electric-blue-100); background:var(--ref-color-electric-blue-10); padding:3px 8px; border-radius:100px; }
+
+  .scroll { flex:1; overflow:auto; padding:32px 28px 40px; }
+  .wrap { max-width:860px; margin:0 auto; }
+  .ap-stepper { justify-content:center; margin-bottom:28px; }
+
+  .panel { background:#fff; border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-lg,12px); padding:24px; }
+  .panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+  .panel-head h2 { font-size:20px; font-weight:700; }
+  .panel-head p { color:var(--ref-color-grey-80); margin-top:4px; }
+
+  .toolbar { display:flex; align-items:center; gap:12px; margin:20px 0 14px; }
+  .toolbar .ap-input-group { max-width:340px; }
+  .toolbar .ap-input-group input { border:none; outline:none; background:transparent; font:inherit; color:inherit; flex:1; min-width:0; }
+  .toolbar .spacer { flex:1; }
+  .linkbtn { border:none; background:none; color:var(--ref-color-electric-blue-100); font-weight:700; cursor:pointer; padding:6px 4px; font-size:14px; }
+  .linkbtn:hover { text-decoration:underline; }
+  .linkbtn:disabled { color:var(--ref-color-grey-40); cursor:default; text-decoration:none; }
+
+  .allrow { display:flex; align-items:center; gap:4px; padding:0 0 12px; color:var(--ref-color-grey-100); }
+  .allrow .meta { color:var(--ref-color-grey-60); margin-left:4px; }
+
+  /* group accordion (same pattern as Team management access) */
+  .groups { display:flex; flex-direction:column; gap:12px; }
+  .grp { border:1px solid var(--ref-color-grey-10); border-radius:var(--ref-border-radius-lg,12px); overflow:hidden; background:#fff; }
+  .grp.has-sel { border-color:var(--ref-color-electric-blue-20,#CFE6FF); }
+  .grp-head { display:flex; align-items:center; gap:8px; padding:6px 12px 6px 6px; min-height:60px; cursor:pointer; user-select:none; }
+  .grp-head:hover { background:var(--ref-color-grey-05,#F9F9FA); }
+  .grp-head .folder { color:var(--ref-color-electric-blue-100); font-size:18px; }
+  .grp-head .gname { font-weight:700; font-size:15px; }
+  .grp-head .gcount { color:var(--ref-color-grey-60); }
+  .grp-head .spacer { flex:1; }
+  .grp-head .selcount { color:var(--ref-color-electric-blue-100); font-weight:700; font-size:13px; }
+  .grp-head .chev { color:var(--ref-color-grey-80); font-size:16px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; transition:transform .15s; }
+  .grp.open .grp-head .chev { transform:rotate(180deg); }
+  .grp-body { display:none; background:var(--ref-color-grey-05,#F9F9FA); border-top:1px solid var(--ref-color-grey-10); padding:4px 0; }
+  .grp.open .grp-body { display:block; }
+
+  .prof { display:flex; align-items:center; gap:10px; padding:4px 16px 4px 6px; min-height:56px; }
+  .prof.disabled .who, .prof.disabled .ap-avatar { opacity:.45; }
+  .who { display:flex; flex-direction:column; min-width:0; }
+  .who .n { font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .who .h { color:var(--ref-color-grey-60); font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .prof .spacer { flex:1; }
+  .ap-avatar .ap-avatar-initials { color:#fff; font-weight:700; }
+  .warn { display:inline-flex; align-items:center; gap:6px; color:var(--ref-color-red-100,#E5484D); font-size:13px; font-weight:700; }
+  .warn i { font-size:16px; }
+
+  .empty { text-align:center; color:var(--ref-color-grey-60); padding:32px 0; }
+  mark { background:var(--ref-color-butter-60,#FBF7C4); color:inherit; border-radius:2px; }
+
+  /* ---------- footer ---------- */
+  .foot { flex-shrink:0; display:flex; align-items:center; gap:14px; height:72px; padding:0 28px; background:#fff; border-top:1px solid var(--ref-color-grey-10); }
+  .foot .count { font-weight:700; }
+  .foot .count.zero { color:var(--ref-color-grey-60); font-weight:400; }
+  .avstack { display:inline-flex; align-items:center; }
+  .avstack .ap-avatar { box-shadow:0 0 0 2px #fff; border-radius:50%; }
+  .avstack .ap-avatar:not(:first-child) { margin-left:-8px; }
+  .avmore { display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; padding:0 6px; margin-left:-8px; border-radius:14px; background:var(--ref-color-grey-10); box-shadow:0 0 0 2px #fff; color:var(--ref-color-grey-80); font-weight:700; font-size:12px; }
+  .foot .spacer { flex:1; }
+  .btn-next { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 18px; border:none; border-radius:var(--ref-border-radius-md,8px); background:var(--ref-color-orange-100,#FF5A1F); color:#fff; font-weight:700; font-size:15px; cursor:pointer; }
+  .btn-next:hover { filter:brightness(.95); }
+  .btn-next:disabled { background:var(--ref-color-grey-10); color:var(--ref-color-grey-40); cursor:default; filter:none; }
+
+  .toast { position:fixed; bottom:92px; left:50%; transform:translateX(-50%); background:#22314F; color:#fff; padding:10px 16px; border-radius:8px; font-weight:600; opacity:0; transition:opacity .2s; pointer-events:none; }
+  .toast.show { opacity:1; }
+
+  /* tooltip */
+  [data-tip] { position:relative; }
+  [data-tip]:hover::after { content:attr(data-tip); position:absolute; right:0; bottom:calc(100% + 6px); background:#22314F; color:#fff; font-size:12px; font-weight:600; padding:6px 8px; border-radius:6px; white-space:nowrap; z-index:5; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- LEFT NAV (static) -->
+  <nav class="nav">
+    <div class="logo">agorapulse</div>
+    <div class="wsp"><span class="num">1</span>AP Beta - WP 01</div>
+    <div class="navitem"><i class="ap-icon-feature-inbox"></i>Inbox</div>
+    <div class="navitem"><i class="ap-icon-feature-publishing"></i>Publishing<i class="ap-icon-chevron-down chev"></i></div>
+    <div class="navitem open"><i class="ap-icon-feature-analytics"></i>Analytics<i class="ap-icon-chevron-up chev"></i></div>
+    <div class="subitem active">Reports</div>
+    <div class="subitem">Competitors</div>
+    <div class="subitem">Social Media ROI</div>
+    <div class="subitem">CSV Builder</div>
+    <div class="subitem">Alerts</div>
+    <div class="navitem"><i class="ap-icon-feature-listening"></i>Listening</div>
+    <div class="navitem"><i class="ap-icon-feature-advocacy"></i>Advocacy<i class="ap-icon-chevron-down chev"></i></div>
+    <div class="navitem"><i class="ap-icon-feature-archie"></i>Archie</div>
+    <div class="grow"></div>
+    <button class="ap-button stroked blue"><i class="ap-icon-paper-plane"></i>Create post</button>
+    <div class="navitem"><i class="ap-icon-bell"></i>Notifications</div>
+    <div class="navitem"><i class="ap-icon-plus"></i>Add user/profile</div>
+    <div class="user"><span class="ap-avatar size-24"><span class="ap-avatar-initials" style="background:#8A93A5">J</span></span>Julien Descorps</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="head">
+      <i class="ap-icon-arrow-left back"></i>
+      <h1>Create a customized report</h1>
+      <span class="proto-badge">Prototype</span>
+    </header>
+
+    <div class="scroll">
+      <div class="wrap">
+        <div class="ap-stepper">
+          <div class="ap-stepper-item active"><span>1</span><span>Social Profiles</span></div>
+          <span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>
+          <div class="ap-stepper-item pending"><span>2</span><span>Template</span></div>
+          <span class="ap-stepper-separator"><i class="ap-icon-chevron-right"></i></span>
+          <div class="ap-stepper-item pending"><span>3</span><span>General information</span></div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Social profiles</h2>
+              <p>Pick the groups or profiles to include in your report.</p>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="ap-input-group"><i class="ap-icon-search"></i><input id="q" placeholder="Search a group or profile" autocomplete="off"></div>
+            <span class="spacer"></span>
+            <button class="linkbtn" id="toggleAll">Expand all</button>
+          </div>
+
+          <div class="allrow">
+            <label class="ap-checkbox-container" id="allBox"><input type="checkbox" id="allInput"><i></i></label>
+            <span>Select all profiles</span><span class="meta" id="allMeta"></span>
+          </div>
+
+          <div class="groups" id="groups"></div>
+        </section>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span class="avstack" id="stack"></span>
+      <span class="count" id="count"></span>
+      <button class="linkbtn" id="clear">Clear</button>
+      <span class="spacer"></span>
+      <button class="btn-next" id="next">Next <i class="ap-icon-chevron-right"></i></button>
+    </footer>
+  </div>
+</div>
+<div class="toast" id="toast">Step 2 is not part of this prototype</div>
+
+<script>
+const NET = { facebook:'facebook-official', instagram:'instagram-official', linkedin:'linkedin-official', x:'x-official',
+  tiktok:'tiktok-official', youtube:'youtube-official', threads:'threads-official', bluesky:'bluesky-official' };
+
+// expired: token expired → cannot be added to a report
+const GROUPS = [
+  { id:'beta', name:'Agorapulse Beta', profiles:[
+    ['Agorapulse','agorapulse','instagram'], ['Agorapulse','Agorapulse','facebook'], ['Agorapulse','agorapulse','linkedin'],
+    ['Agorapulse','agorapulse','x'], ['Agorapulse','@agorapulse','youtube'], ['Agorapulse','agorapulse','tiktok'] ]},
+  { id:'real', name:'Agorapulse REAL accounts', profiles:[
+    ['Agorapulse FR','agorapulse_fr','instagram'], ['Agorapulse FR','Agorapulse France','facebook'], ['Agorapulse ES','agorapulse_es','x',1],
+    ['Agorapulse DE','agorapulse.de','linkedin'], ['Agorapulse UK','agorapulse_uk','instagram'], ['Agorapulse US','agorapulse_us','threads'],
+    ['Agorapulse Jobs','agorapulse-jobs','linkedin'], ['Agorapulse Events','agorapulse.events','facebook',1], ['Agorapulse Labs','agorapulse.labs','bluesky'] ]},
+  { id:'emoji', name:'😂 emoji & test', profiles:[
+    ['Antoine Dupont','Antoine92151572','x'], ['benminiaturesparis','Ben Miniatures (Paris)','facebook'], ['Cat lover page','Cat lover page','facebook'],
+    ['DevTestCo','DevTestCo','linkedin'], ['Flower Power','Flower Power','facebook'], ['Osbaldabi','Osbaldabi','youtube'],
+    ['Player Hook','player_hook','x'], ['Test Shop','testshop.paris','instagram'], ['Pixel Lab','pixellab','tiktok',1],
+    ['Sandbox Page','Sandbox Page','facebook'], ['QA Threads','qa_threads','threads'] ]},
+  { id:'none', name:'Profiles without group', ungrouped:true, profiles:[
+    ['billyboy','billyboy','x',1], ['Marketing Manager','Marketing Manager','linkedin',1], ['alexkerv8','alexkerv8','tiktok',1],
+    ['Ibrahima Diaby','ibrahimadiaby','x',1], ['fefetipical','fefetipical','threads',1], ['ibou','ibou','threads'],
+    ['iboupulsetkperso','iboupulsetkperso','tiktok'], ['hookedbyhilary','hookedbyhilary','bluesky'], ['Jck Flap Band 1','Jck Flap Band 1','facebook',1],
+    ['Ibrahima Diaby','Ibrahima Diaby','linkedin'] ]},
+].map(g => ({ ...g, profiles:g.profiles.map((p,i)=>({ id:`${g.id}-${i}`, name:p[0], handle:p[1], net:p[2], expired:!!p[3] })) }));
+
+const ALL = GROUPS.flatMap(g=>g.profiles);
+const OK = ALL.filter(p=>!p.expired);
+const selected = new Set();
+const open = new Set(['emoji']);
+let q = '';
+
+const COLORS = ['#7B61FF','#178DFE','#00A3A3','#FF8A3D','#E5484D','#2EB67D','#B05CE0','#4A86C5'];
+const color = s => COLORS[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
+const initial = s => ([...s.replace(/[^\p{L}\p{N}]/gu,'')][0]||'?').toUpperCase();
+const esc = s => s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hl = s => { const e = esc(s); if(!q) return e; const i = s.toLowerCase().indexOf(q); if(i<0) return e;
+  return esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length)); };
+const avatar = (p,size=36) => `<span class="ap-avatar size-${size}"><span class="ap-avatar-initials" style="background:${color(p.name)}">${initial(p.name)}</span>${size>=32?`<span class="ap-avatar-network"><i class="ap-icon-${NET[p.net]}"></i></span>`:''}</span>`;
+const box = (state, attrs='', disabled=false) =>
+  `<label class="ap-checkbox-container${state==='some'?' indeterminate':''}" ${attrs}><input type="checkbox" ${state==='all'?'checked':''} ${disabled?'disabled':''}><i></i></label>`;
+const stateOf = list => { const ok = list.filter(p=>!p.expired); const n = ok.filter(p=>selected.has(p.id)).length;
+  return n===0?'none':n===ok.length?'all':'some'; };
+
+function visible(g){
+  if(!q) return { show:true, profiles:g.profiles };
+  const gm = g.name.toLowerCase().includes(q);
+  const ps = gm ? g.profiles : g.profiles.filter(p=>(p.name+' '+p.handle).toLowerCase().includes(q));
+  return { show: ps.length>0, profiles:ps };
+}
+
+function render(){
+  let html = '';
+  for(const g of GROUPS){
+    const v = visible(g); if(!v.show) continue;
+    const ok = g.profiles.filter(p=>!p.expired);
+    const n = ok.filter(p=>selected.has(p.id)).length;
+    const isOpen = open.has(g.id) || !!q;
+    html += `<div class="grp${isOpen?' open':''}${n?' has-sel':''}" data-g="${g.id}">
+      <div class="grp-head" data-toggle="${g.id}">
+        ${box(stateOf(g.profiles), `data-gbox="${g.id}"`)}
+        <i class="ap-icon-folder folder"></i>
+        <span class="gname">${hl(g.name)}</span>
+        <span class="gcount">${g.profiles.length} profiles</span>
+        <span class="spacer"></span>
+        ${n?`<span class="selcount">${n} of ${ok.length} selected</span>`:''}
+        <span class="chev"><i class="ap-icon-chevron-down"></i></span>
+      </div>
+      <div class="grp-body">${v.profiles.map(p=>`
+        <div class="prof${p.expired?' disabled':''}">
+          ${box(selected.has(p.id)?'all':'none', `data-pbox="${p.id}"`, p.expired)}
+          ${avatar(p)}
+          <div class="who"><span class="n">${hl(p.name)}</span><span class="h">${hl(p.handle)}</span></div>
+          <span class="spacer"></span>
+          ${p.expired?`<span class="warn" data-tip="Reconnect this profile to add it to a report"><i class="ap-icon-error"></i>Disconnected</span>`:''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+  document.getElementById('groups').innerHTML = html || `<div class="empty">No group or profile matches “${esc(q)}”.</div>`;
+
+  // select-all
+  const s = stateOf(ALL);
+  const allBox = document.getElementById('allBox');
+  allBox.classList.toggle('indeterminate', s==='some');
+  document.getElementById('allInput').checked = s==='all';
+  document.getElementById('allMeta').textContent = `· ${OK.length} available`;
+
+  // footer
+  const sel = ALL.filter(p=>selected.has(p.id));
+  const c = document.getElementById('count');
+  c.textContent = sel.length ? `${sel.length} profile${sel.length>1?'s':''} selected` : 'No profiles selected yet';
+  c.classList.toggle('zero', !sel.length);
+  document.getElementById('stack').innerHTML = sel.slice(0,5).map(p=>avatar(p,24)).join('') + (sel.length>5?`<span class="avmore">+${sel.length-5}</span>`:'');
+  document.getElementById('clear').style.display = sel.length ? '' : 'none';
+  document.getElementById('next').disabled = !sel.length;
+  document.getElementById('toggleAll').textContent = open.size===GROUPS.length ? 'Collapse all' : 'Expand all';
+  document.getElementById('toggleAll').disabled = !!q;
+}
+
+document.getElementById('groups').addEventListener('click', e => {
+  const gb = e.target.closest('[data-gbox]'), pb = e.target.closest('[data-pbox]'), tg = e.target.closest('[data-toggle]');
+  if(gb){ e.preventDefault(); e.stopPropagation();
+    const g = GROUPS.find(x=>x.id===gb.dataset.gbox); const ok = g.profiles.filter(p=>!p.expired);
+    const all = stateOf(g.profiles)==='all'; ok.forEach(p=> all?selected.delete(p.id):selected.add(p.id)); render(); return; }
+  if(pb){ e.preventDefault(); const id = pb.dataset.pbox; const p = ALL.find(x=>x.id===id); if(p.expired) return;
+    selected.has(id)?selected.delete(id):selected.add(id); render(); return; }
+  if(tg && !q){ const id = tg.dataset.toggle; open.has(id)?open.delete(id):open.add(id); render(); }
+});
+document.getElementById('allBox').addEventListener('click', e => { e.preventDefault();
+  const all = stateOf(ALL)==='all'; OK.forEach(p=> all?selected.delete(p.id):selected.add(p.id)); render(); });
+document.getElementById('q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); render(); });
+document.getElementById('toggleAll').addEventListener('click', () => {
+  if(open.size===GROUPS.length) open.clear(); else GROUPS.forEach(g=>open.add(g.id)); render(); });
+document.getElementById('clear').addEventListener('click', () => { selected.clear(); render(); });
+document.getElementById('next').addEventListener('click', () => { const t = document.getElementById('toast');
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); });
+render();
+</script>
+</body>
+</html>
