@@ -252,8 +252,8 @@
       <div class="admin-menu__section">
         <span class="admin-menu__section-title">Step order</span>
         <div class="admin-menu__cards" role="radiogroup">
+          <label class="ap-radio-card card"><input type="radio" name="order" value="sources"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Sources first</span><span class="admin-menu__opt-hint">Default: sources, then template</span></span></label>
           <label class="ap-radio-card card"><input type="radio" name="order" value="template"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Template first</span><span class="admin-menu__opt-hint">Current code (master)</span></span></label>
-          <label class="ap-radio-card card"><input type="radio" name="order" value="sources"><span class="admin-menu__opt-text"><span class="admin-menu__opt-label">Profiles first</span><span class="admin-menu__opt-hint">As in the beta screenshot</span></span></label>
         </div>
       </div>
       <div class="admin-menu__section">
@@ -501,7 +501,7 @@ const store = { get(k){ try { return localStorage.getItem('rpp.'+k); } catch(e){
 const url = new URLSearchParams(location.search);
 const opts = {
   mode:    url.get('mode') || store.get('mode') || 'profiles',
-  order:   url.get('order') || store.get('order') || 'template',
+  order:   url.get('order') || store.get('order2') || 'sources',
   config:  (store.get('config') ?? '1') === '1',
   showOff: (store.get('showOff') ?? '1') === '1',
   openAll: store.get('openAll') === '1',
@@ -989,7 +989,7 @@ function setUrl(k,v){ const u = new URL(location.href); u.searchParams.set(k, v)
 menu.addEventListener('change', e => {
   const t = e.target;
   if(t.name==='mode'){ opts.mode = t.value; store.set('mode', t.value); setUrl('mode', t.value); S.q=''; $('q').value=''; }
-  if(t.name==='order'){ opts.order = t.value; store.set('order', t.value); setUrl('order', t.value); }
+  if(t.name==='order'){ opts.order = t.value; store.set('order2', t.value); setUrl('order', t.value); }
   if(t.id==='optConfig'){ opts.config = t.checked; store.set('config', t.checked?'1':'0'); if(!opts.config && S.step==='config') S.step='settings'; }
   if(t.id==='optOff'){ opts.showOff = t.checked; store.set('showOff', t.checked?'1':'0'); }
   if(t.id==='optOpen'){ opts.openAll = t.checked; store.set('openAll', t.checked?'1':'0'); S.open = new Set(t.checked ? GROUPS.map(g=>g.id) : ['emoji']); }
