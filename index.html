@@ -274,7 +274,7 @@
     <header class="head">
       <button class="ap-icon-button" aria-label="Back" id="quit"><i class="ap-icon-arrow-left"></i></button>
       <h1 class="ap-h1">Create a customized report</h1>
-      <span class="ap-status blue no-dot badge">Prototype · v6</span>
+      <span class="ap-status blue no-dot badge">Prototype · v7</span>
     </header>
 
     <div class="scroll" id="scroll">
@@ -673,7 +673,6 @@ function renderTemplate(){
       ${S.template===t.id?'<span class="card-corner ap-status blue no-dot">Selected</span>':''}
       ${ill(t.img)}
       <div><h3>${t.name}</h3><p class="edit-template__card-description">${block ? block : t.desc}</p></div>
-      <div class="card-tabs">${t.tabs.map(x=>tag(x,'grey mini')).join('')}${extraTags}</div>
     </button>`;
   }).join('');
 }
